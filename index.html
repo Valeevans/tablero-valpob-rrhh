@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tablero RRHH — Grupo VALPOB</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --vp-navy: #1F3864;
+  --vp-blue: #2F5496;
+  --vp-light: #BDD7EE;
+  --vp-accent: #4FA8D8;
+  --vp-green: #375623;
+  --vp-green-bg: #E2EFDA;
+  --vp-amber: #B87333;
+  --vp-amber-bg: #FFF2CC;
+  --vp-red: #C00000;
+  --vp-red-bg: #FFCCCC;
+  --vp-gray: #F5F6FA;
+  --vp-border: #DDE3ED;
+  --vp-text: #1a2540;
+  --vp-muted: #5a6680;
+  --vp-white: #ffffff;
+  --tab-h: 48px;
+  --header-h: 64px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: #EEF1F8;
+  color: var(--vp-text);
+  min-height: 100vh;
+}
+
+/* ── HEADER ── */
+.header {
+  background: var(--vp-navy);
+  height: var(--header-h);
+  display: flex;
+  align-items: center;
+  padding: 0 28px;
+  gap: 16px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.header-logo {
+  width: 36px; height: 36px;
+  background: var(--vp-accent);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 600; font-size: 14px; color: white; letter-spacing: 0.5px;
+}
+.header-title { color: white; font-size: 17px; font-weight: 500; }
+.header-sub { color: rgba(255,255,255,0.5); font-size: 12px; margin-left: 2px; }
+.header-right { margin-left: auto; display: flex; align-items: center; gap: 12px; }
+.gs-status { font-size: 12px; color: rgba(255,255,255,0.6); display: flex; align-items: center; gap: 6px; }
+.gs-dot { width: 7px; height: 7px; border-radius: 50%; background: #4caf50; }
+.gs-dot.offline { background: #ff9800; }
+.btn-sync {
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.2);
+  color: white;
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-family: 'DM Sans', sans-serif;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.btn-sync:hover { background: rgba(255,255,255,0.2); }
+
+/* ── TABS ── */
+.tabs-bar {
+  background: var(--vp-white);
+  border-bottom: 1px solid var(--vp-border);
+  display: flex;
+  padding: 0 28px;
+  gap: 4px;
+  position: sticky;
+  top: var(--header-h);
+  z-index: 99;
+}
+.tab-btn {
+  padding: 0 18px;
+  height: var(--tab-h);
+  border: none;
+  background: none;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13.5px;
+  color: var(--vp-muted);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.tab-btn:hover { color: var(--vp-blue); }
+.tab-btn.active { color: var(--vp-navy); font-weight: 500; border-bottom-color: var(--vp-accent); }
+
+/* ── LAYOUT ── */
+.page { display: none; padding: 28px; max-width: 1300px; margin: 0 auto; }
+.page.active { display: block; }
+
+/* ── KPI CARDS ── */
+.kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 24px; }
+.kpi-card {
+  background: var(--vp-white);
+  border-radius: 10px;
+  border: 1px solid var(--vp-border);
+  padding: 18px 20px;
+}
+.kpi-label { font-size: 11.5px; color: var(--vp-muted); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 8px; }
+.kpi-val { font-size: 28px; font-weight: 600; color: var(--vp-navy); line-height: 1; }
+.kpi-sub { font-size: 11.5px; color: var(--vp-muted); margin-top: 6px; }
+.kpi-card.green .kpi-val { color: var(--vp-green); }
+.kpi-card.amber .kpi-val { color: var(--vp-amber); }
+.kpi-card.red .kpi-val { color: var(--vp-red); }
+
+/* ── SECTION TITLE ── */
+.section-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--vp-navy);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: 14px;
+  padding-bottom: 8px;
+  border-bottom: 1.5px solid var(--vp-border);
+}
+
+/* ── CARD ── */
+.card {
+  background: var(--vp-white);
+  border-radius: 10px;
+  border: 1px solid var(--vp-border);
+  padding: 20px 24px;
+  margin-bottom: 20px;
+}
+.card-title { font-size: 13.5px; font-weight: 500; color: var(--vp-navy); margin-bottom: 16px; }
+
+/* ── GRID 2 COL ── */
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 20px; }
+.grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 18px; margin-bottom: 20px; }
+@media(max-width: 800px) { .grid2,.grid3 { grid-template-columns: 1fr; } }
+
+/* ── FORMACION TABLE ── */
+.form-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+.form-table th {
+  background: var(--vp-navy);
+  color: white;
+  padding: 8px 10px;
+  text-align: left;
+  font-weight: 500;
+  font-size: 11.5px;
+  white-space: nowrap;
+}
+.form-table td { padding: 8px 10px; border-bottom: 1px solid var(--vp-border); vertical-align: middle; }
+.form-table tr:hover td { background: var(--vp-gray); }
+.form-table tr.bloque-header td {
+  background: #EEF1F8;
+  font-weight: 600;
+  font-size: 11px;
+  color: var(--vp-blue);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 6px 10px;
+}
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 500;
+}
+.badge-ok { background: var(--vp-green-bg); color: var(--vp-green); }
+.badge-plan { background: var(--vp-light); color: var(--vp-navy); }
+.badge-pend { background: var(--vp-amber-bg); color: var(--vp-amber); }
+.badge-sgc { background: #E8EEF8; color: var(--vp-blue); }
+.badge-syh { background: var(--vp-green-bg); color: var(--vp-green); }
+.badge-hab { background: var(--vp-amber-bg); color: #7a5200; }
+
+/* month cells */
+.month-cell { text-align: center; min-width: 28px; }
+.mark-ok { color: var(--vp-green); font-weight: 700; font-size: 14px; }
+.mark-plan { color: var(--vp-blue); font-size: 13px; }
+.mark-pend { color: var(--vp-amber); font-size: 13px; }
+
+/* ── PROGRESS BAR ── */
+.prog-wrap { display: flex; align-items: center; gap: 10px; }
+.prog-bar-bg { flex: 1; background: #e8ecf3; border-radius: 4px; height: 7px; }
+.prog-bar-fill { height: 100%; border-radius: 4px; background: var(--vp-accent); transition: width 0.6s ease; }
+.prog-bar-fill.green { background: #4caf50; }
+.prog-bar-fill.amber { background: #f4a228; }
+.prog-bar-fill.red { background: var(--vp-red); }
+.prog-pct { font-size: 12px; font-weight: 600; min-width: 34px; color: var(--vp-navy); }
+
+/* ── PERFILES ── */
+.perfil-card {
+  background: var(--vp-white);
+  border: 1px solid var(--vp-border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.perfil-head {
+  background: var(--vp-navy);
+  color: white;
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.perfil-avatar {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: var(--vp-accent);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 600; font-size: 13px; color: white; flex-shrink: 0;
+}
+.perfil-puesto { font-size: 14px; font-weight: 500; }
+.perfil-area { font-size: 11.5px; color: rgba(255,255,255,0.6); margin-top: 2px; }
+.perfil-body { padding: 14px 18px; font-size: 12.5px; }
+.perfil-row { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid var(--vp-border); }
+.perfil-row:last-child { border-bottom: none; }
+.perfil-key { color: var(--vp-muted); }
+.perfil-val { font-weight: 500; color: var(--vp-navy); }
+.comp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 10px; font-size: 12px; }
+.comp-item { display: flex; align-items: center; gap: 6px; }
+.comp-dots { display: flex; gap: 2px; }
+.comp-dot { width: 8px; height: 8px; border-radius: 2px; }
+.comp-dot.filled { background: var(--vp-accent); }
+.comp-dot.empty { background: #dde3ed; }
+
+/* ── DESEMPEÑO ── */
+.desempenio-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+.desempenio-table th { background: var(--vp-navy); color: white; padding: 9px 12px; text-align: left; font-size: 12px; font-weight: 500; }
+.desempenio-table td { padding: 10px 12px; border-bottom: 1px solid var(--vp-border); vertical-align: middle; }
+.desempenio-table tr:hover td { background: var(--vp-gray); }
+.score-circle {
+  width: 32px; height: 32px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 600; font-size: 13px; color: white;
+}
+.score-5 { background: #1b7b3a; }
+.score-4 { background: #4caf50; }
+.score-3 { background: #f4a228; }
+.score-2 { background: #e05a28; }
+.score-1 { background: #c00000; }
+.score-nd { background: #b0b8c8; }
+
+/* ── KPI RRHH ── */
+.kpi-big { text-align: center; padding: 20px; }
+.kpi-big-val { font-size: 42px; font-weight: 600; color: var(--vp-navy); line-height: 1; }
+.kpi-big-label { font-size: 13px; color: var(--vp-muted); margin-top: 8px; }
+.kpi-big-target { font-size: 11.5px; color: var(--vp-muted); margin-top: 4px; }
+
+/* ── GS CONFIG ── */
+.gs-form { display: flex; flex-direction: column; gap: 14px; max-width: 600px; }
+.gs-form label { font-size: 13px; color: var(--vp-muted); margin-bottom: 4px; display: block; }
+.gs-form input[type=text] {
+  width: 100%; padding: 10px 14px; border-radius: 7px;
+  border: 1px solid var(--vp-border); font-family: 'DM Mono', monospace;
+  font-size: 12.5px; color: var(--vp-text);
+  background: var(--vp-white);
+}
+.gs-form input[type=text]:focus { outline: none; border-color: var(--vp-accent); }
+.btn-primary {
+  padding: 10px 22px; background: var(--vp-blue); color: white;
+  border: none; border-radius: 7px; font-family: 'DM Sans', sans-serif;
+  font-size: 13.5px; font-weight: 500; cursor: pointer; transition: background 0.15s;
+}
+.btn-primary:hover { background: var(--vp-navy); }
+.instrucciones { background: #EEF1F8; border-radius: 8px; padding: 16px 20px; font-size: 12.5px; line-height: 1.8; color: var(--vp-muted); }
+.instrucciones ol { padding-left: 18px; }
+.instrucciones li { margin-bottom: 4px; }
+.instrucciones code { font-family: 'DM Mono', monospace; background: var(--vp-white); padding: 1px 5px; border-radius: 3px; font-size: 12px; color: var(--vp-blue); }
+.tag-hoja { display: inline-block; background: var(--vp-navy); color: white; font-family: 'DM Mono', monospace; font-size: 11px; padding: 2px 6px; border-radius: 3px; margin: 1px; }
+
+/* ── FILTERS ── */
+.filter-bar { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+.filter-select {
+  padding: 7px 12px; border-radius: 6px; border: 1px solid var(--vp-border);
+  font-family: 'DM Sans', sans-serif; font-size: 12.5px; color: var(--vp-text);
+  background: var(--vp-white); cursor: pointer;
+}
+.filter-select:focus { outline: none; border-color: var(--vp-accent); }
+
+/* chart wrapper */
+.chart-wrap { position: relative; width: 100%; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-logo">VP</div>
+  <div>
+    <div class="header-title">Tablero RRHH — Grupo VALPOB S.R.L.</div>
+    <div class="header-sub">Panel de gestión de personas · 2026</div>
+  </div>
+  <div class="header-right">
+    <div class="gs-status" id="gsStatus">
+      <div class="gs-dot offline" id="gsDot"></div>
+      <span id="gsStatusText">Sin conexión a Sheets</span>
+    </div>
+    <button class="btn-sync" onclick="syncSheets()">↻ Sincronizar</button>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="tabs-bar">
+  <button class="tab-btn active" onclick="showTab('resumen')">Resumen general</button>
+  <button class="tab-btn" onclick="showTab('formacion')">Plan de formación 2026</button>
+  <button class="tab-btn" onclick="showTab('perfiles')">Perfiles y competencias</button>
+  <button class="tab-btn" onclick="showTab('desempenio')">Evaluación de desempeño</button>
+  <button class="tab-btn" onclick="showTab('kpis')">KPIs de RRHH</button>
+  <button class="tab-btn" onclick="showTab('config')">Configuración</button>
+</div>
+
+<!-- ══════════════════════════════════
+     TAB: RESUMEN
+══════════════════════════════════ -->
+<div class="page active" id="tab-resumen">
+
+  <div class="kpi-row">
+    <div class="kpi-card">
+      <div class="kpi-label">Personal activo</div>
+      <div class="kpi-val" id="kpi-personal">11</div>
+      <div class="kpi-sub">puestos cubiertos</div>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-label">Formación completada</div>
+      <div class="kpi-val" id="kpi-form-pct">10%</div>
+      <div class="kpi-sub" id="kpi-form-sub">3 de 31 actividades</div>
+    </div>
+    <div class="kpi-card amber">
+      <div class="kpi-label">Actividades pendientes</div>
+      <div class="kpi-val" id="kpi-form-pend">28</div>
+      <div class="kpi-sub">planificadas / año</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Perfiles documentados</div>
+      <div class="kpi-val">10</div>
+      <div class="kpi-sub">de 11 puestos</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Evaluaciones desempeño</div>
+      <div class="kpi-val" id="kpi-eval">0%</div>
+      <div class="kpi-sub">0 de 11 realizadas</div>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <div class="card-title">Avance plan de formación por bloque</div>
+      <div style="display:flex; flex-direction:column; gap:12px;">
+        <div>
+          <div style="display:flex; justify-content:space-between; font-size:12.5px; margin-bottom:6px;">
+            <span>SGC / ISO 9001 (10 actividades)</span><span id="pb1-txt">30%</span>
+          </div>
+          <div class="prog-bar-bg"><div class="prog-bar-fill green" id="pb1" style="width:30%"></div></div>
+        </div>
+        <div>
+          <div style="display:flex; justify-content:space-between; font-size:12.5px; margin-bottom:6px;">
+            <span>Seguridad e Higiene (14 actividades)</span><span id="pb2-txt">0%</span>
+          </div>
+          <div class="prog-bar-bg"><div class="prog-bar-fill amber" id="pb2" style="width:0%"></div></div>
+        </div>
+        <div>
+          <div style="display:flex; justify-content:space-between; font-size:12.5px; margin-bottom:6px;">
+            <span>Habilidades y competencias (7 actividades)</span><span id="pb3-txt">0%</span>
+          </div>
+          <div class="prog-bar-bg"><div class="prog-bar-fill" id="pb3" style="width:0%"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Distribución de personal por área</div>
+      <div class="chart-wrap" style="height:220px;">
+        <canvas id="chartAreas" role="img" aria-label="Gráfico de torta con distribución de personal por área">Gerencia 2, S&H 2, Tec/Op 2, SGC 1, RRHH 1, Compras 2, Contabilidad 1.</canvas>
+      </div>
+      <div id="legendAreas" style="display:flex; flex-wrap:wrap; gap:10px; font-size:11.5px; margin-top:10px; color:var(--vp-muted);"></div>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <div class="card-title">Actividades de formación por mes — 2026</div>
+      <div class="chart-wrap" style="height:200px;">
+        <canvas id="chartFormMes" role="img" aria-label="Actividades de formación planificadas por mes">Ver detalle en pestaña Plan de formación.</canvas>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Alertas y próximas acciones</div>
+      <div style="display:flex; flex-direction:column; gap:10px; font-size:13px;">
+        <div style="background:#FFF8E1; border-left:3px solid #f4a228; padding:10px 14px; border-radius:0 6px 6px 0;">
+          <strong style="color:#7a5200;">Control documental SGC</strong><br>
+          <span style="color:var(--vp-muted); font-size:12px;">Secretarias sin acceso al sistema. Capacitación pendiente — Abr/May.</span>
+        </div>
+        <div style="background:#FFF8E1; border-left:3px solid #f4a228; padding:10px 14px; border-radius:0 6px 6px 0;">
+          <strong style="color:#7a5200;">Gestión del cambio</strong><br>
+          <span style="color:var(--vp-muted); font-size:12px;">Procedimiento de gestión del cambio pendiente. Capacitación — May.</span>
+        </div>
+        <div style="background:#E8F5E9; border-left:3px solid #4caf50; padding:10px 14px; border-radius:0 6px 6px 0;">
+          <strong style="color:#1b5e20;">ISO 9001 — completado</strong><br>
+          <span style="color:var(--vp-muted); font-size:12px;">Introducción (Feb), contexto/FODA/riesgos (Mar) — ✔ realizados.</span>
+        </div>
+        <div style="background:#E3F2FD; border-left:3px solid #2196f3; padding:10px 14px; border-radius:0 6px 6px 0;">
+          <strong style="color:#0d47a1;">Evaluación de desempeño 2026</strong><br>
+          <span style="color:var(--vp-muted); font-size:12px;">Primera ronda sin iniciar. Planificar para Jul–Ago.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     TAB: FORMACION
+══════════════════════════════════ -->
+<div class="page" id="tab-formacion">
+
+  <div class="kpi-row" style="grid-template-columns: repeat(4, 1fr);">
+    <div class="kpi-card green">
+      <div class="kpi-label">Realizadas</div>
+      <div class="kpi-val" id="f-realizadas">3</div>
+      <div class="kpi-sub">actividades ✔</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Planificadas</div>
+      <div class="kpi-val" id="f-planificadas">25</div>
+      <div class="kpi-sub">actividades ◆</div>
+    </div>
+    <div class="kpi-card amber">
+      <div class="kpi-label">A confirmar</div>
+      <div class="kpi-val" id="f-confirmar">3</div>
+      <div class="kpi-sub">actividades ●</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Total actividades</div>
+      <div class="kpi-val">31</div>
+      <div class="kpi-sub">plan 2026</div>
+    </div>
+  </div>
+
+  <div class="filter-bar">
+    <select class="filter-select" id="filtroBloque" onchange="renderFormacion()">
+      <option value="">Todos los bloques</option>
+      <option value="SGC">SGC / Calidad</option>
+      <option value="SYH">Seguridad e Higiene</option>
+      <option value="HAB">Habilidades</option>
+    </select>
+    <select class="filter-select" id="filtroEstado" onchange="renderFormacion()">
+      <option value="">Todos los estados</option>
+      <option value="✔">Realizadas</option>
+      <option value="◆">Planificadas</option>
+      <option value="●">A confirmar</option>
+    </select>
+    <select class="filter-select" id="filtroMes" onchange="renderFormacion()">
+      <option value="">Todos los meses</option>
+      <option value="1">Enero</option><option value="2">Febrero</option>
+      <option value="3">Marzo</option><option value="4">Abril</option>
+      <option value="5">Mayo</option><option value="6">Junio</option>
+      <option value="7">Julio</option><option value="8">Agosto</option>
+      <option value="9">Septiembre</option><option value="10">Octubre</option>
+      <option value="11">Noviembre</option><option value="12">Diciembre</option>
+    </select>
+  </div>
+
+  <div class="card" style="padding:0; overflow:hidden;">
+    <table class="form-table" id="tablaFormacion">
+      <thead>
+        <tr>
+          <th style="width:30px">N°</th>
+          <th>Actividad de formación</th>
+          <th>Categoría</th>
+          <th>Dirigido a</th>
+          <th class="month-cell">E</th><th class="month-cell">F</th>
+          <th class="month-cell">M</th><th class="month-cell">A</th>
+          <th class="month-cell">M</th><th class="month-cell">J</th>
+          <th class="month-cell">J</th><th class="month-cell">A</th>
+          <th class="month-cell">S</th><th class="month-cell">O</th>
+          <th class="month-cell">N</th><th class="month-cell">D</th>
+          <th>Responsable</th>
+        </tr>
+      </thead>
+      <tbody id="formTbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     TAB: PERFILES
+══════════════════════════════════ -->
+<div class="page" id="tab-perfiles">
+  <div class="kpi-row" style="grid-template-columns: repeat(3,1fr);">
+    <div class="kpi-card green">
+      <div class="kpi-label">Perfiles documentados</div>
+      <div class="kpi-val">10</div>
+      <div class="kpi-sub">de 11 puestos</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Competencias mapeadas</div>
+      <div class="kpi-val">27</div>
+      <div class="kpi-sub">categorías</div>
+    </div>
+    <div class="kpi-card amber">
+      <div class="kpi-label">Perfiles por completar</div>
+      <div class="kpi-val">1</div>
+      <div class="kpi-sub">Analista de Compras</div>
+    </div>
+  </div>
+
+  <div class="section-title">Perfiles de puesto — Grupo VALPOB S.R.L.</div>
+  <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(290px,1fr)); gap:16px;" id="perfilesGrid"></div>
+</div>
+
+<!-- ══════════════════════════════════
+     TAB: DESEMPEÑO
+══════════════════════════════════ -->
+<div class="page" id="tab-desempenio">
+  <div class="kpi-row" style="grid-template-columns: repeat(4,1fr);">
+    <div class="kpi-card amber">
+      <div class="kpi-label">Evaluaciones realizadas</div>
+      <div class="kpi-val" id="ev-realizadas">0</div>
+      <div class="kpi-sub">de 11 puestos</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Período vigente</div>
+      <div class="kpi-val" style="font-size:20px;">2026</div>
+      <div class="kpi-sub">Ronda 1 — Jul/Ago</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Promedio general</div>
+      <div class="kpi-val" id="ev-prom">—</div>
+      <div class="kpi-sub">escala 1–5</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Con plan de mejora</div>
+      <div class="kpi-val" id="ev-mejora">0</div>
+      <div class="kpi-sub">colaboradores</div>
+    </div>
+  </div>
+
+  <div class="card" style="padding:0; overflow:hidden;">
+    <table class="desempenio-table">
+      <thead>
+        <tr>
+          <th>Colaborador / Puesto</th>
+          <th>Área</th>
+          <th style="text-align:center">Puntaje</th>
+          <th>Competencias clave</th>
+          <th>Estado</th>
+          <th>Observaciones</th>
+        </tr>
+      </thead>
+      <tbody id="desempenioTbody"></tbody>
+    </table>
+  </div>
+
+  <div class="card" style="margin-top:20px;">
+    <div class="card-title">Criterios de evaluación — Escala de desempeño</div>
+    <div style="display:grid; grid-template-columns: repeat(5,1fr); gap:10px; font-size:12.5px;">
+      <div style="text-align:center; padding:12px; background:#E8F5E9; border-radius:7px;">
+        <div class="score-circle" style="margin:0 auto 6px; background:#1b7b3a;">5</div>
+        <strong>Supera ampliamente</strong><br><span style="color:var(--vp-muted);">Referente del área</span>
+      </div>
+      <div style="text-align:center; padding:12px; background:#F1F8E9; border-radius:7px;">
+        <div class="score-circle" style="margin:0 auto 6px; background:#4caf50;">4</div>
+        <strong>Supera lo esperado</strong><br><span style="color:var(--vp-muted);">Alto desempeño</span>
+      </div>
+      <div style="text-align:center; padding:12px; background:#FFF8E1; border-radius:7px;">
+        <div class="score-circle" style="margin:0 auto 6px; background:#f4a228;">3</div>
+        <strong>Cumple</strong><br><span style="color:var(--vp-muted);">Según lo esperado</span>
+      </div>
+      <div style="text-align:center; padding:12px; background:#FBE9E7; border-radius:7px;">
+        <div class="score-circle" style="margin:0 auto 6px; background:#e05a28;">2</div>
+        <strong>En desarrollo</strong><br><span style="color:var(--vp-muted);">Necesita mejora</span>
+      </div>
+      <div style="text-align:center; padding:12px; background:#FFEBEE; border-radius:7px;">
+        <div class="score-circle" style="margin:0 auto 6px; background:#c00000;">1</div>
+        <strong>Crítico</strong><br><span style="color:var(--vp-muted);">Plan de acción urgente</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     TAB: KPIs RRHH
+══════════════════════════════════ -->
+<div class="page" id="tab-kpis">
+  <div class="section-title">Indicadores de RRHH — seguimiento 2026</div>
+  <div class="grid3">
+    <div class="card" style="text-align:center;">
+      <div class="kpi-label">Plan anual de formación</div>
+      <div class="kpi-big-val" id="kpi-ig06">10%</div>
+      <div class="kpi-big-label">IG-06 · % capacitaciones realizadas</div>
+      <div class="kpi-big-target">Meta: ≥ 90%</div>
+      <div style="margin-top:12px;"><div class="prog-bar-bg"><div class="prog-bar-fill amber" id="pb-ig06" style="width:10%"></div></div></div>
+    </div>
+    <div class="card" style="text-align:center;">
+      <div class="kpi-label">Eficacia de capacitaciones</div>
+      <div class="kpi-big-val" id="kpi-ig07">—</div>
+      <div class="kpi-big-label">IG-07 · % capacitaciones eficaces</div>
+      <div class="kpi-big-target">Meta: ≥ 90% · Periodicidad: semestral</div>
+      <div style="margin-top:12px;"><div class="prog-bar-bg"><div class="prog-bar-fill" id="pb-ig07" style="width:0%"></div></div></div>
+    </div>
+    <div class="card" style="text-align:center;">
+      <div class="kpi-label">Evaluaciones de desempeño</div>
+      <div class="kpi-big-val" id="kpi-ig-eval">0%</div>
+      <div class="kpi-big-label">% evaluaciones realizadas / año</div>
+      <div class="kpi-big-target">Meta: 100% · Período: Jul–Ago</div>
+      <div style="margin-top:12px;"><div class="prog-bar-bg"><div class="prog-bar-fill red" id="pb-eval" style="width:0%"></div></div></div>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <div class="card-title">Evolución plan de formación — actividades por mes</div>
+      <div class="chart-wrap" style="height:240px;">
+        <canvas id="chartKpiForm" role="img" aria-label="Actividades de formación planificadas vs realizadas por mes 2026">Datos de formación mensual 2026.</canvas>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Actividades por categoría</div>
+      <div class="chart-wrap" style="height:240px;">
+        <canvas id="chartCategoria" role="img" aria-label="Actividades por categoría SGC, S&H y Habilidades">SGC 10, S&H 14, Habilidades 7.</canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Registros mensuales — carga manual desde Google Sheets</div>
+    <table style="width:100%; font-size:12.5px; border-collapse:collapse;">
+      <thead>
+        <tr>
+          <th style="background:var(--vp-navy);color:white;padding:8px 12px;text-align:left;font-weight:500;">Indicador</th>
+          <th style="background:var(--vp-navy);color:white;padding:8px 12px;text-align:left;font-weight:500;">Código</th>
+          <th style="background:var(--vp-navy);color:white;padding:8px 12px;text-align:center;font-weight:500;">Meta</th>
+          <th style="background:var(--vp-navy);color:white;padding:8px 12px;text-align:center;font-weight:500;">Valor actual</th>
+          <th style="background:var(--vp-navy);color:white;padding:8px 12px;text-align:left;font-weight:500;">Estado</th>
+          <th style="background:var(--vp-navy);color:white;padding:8px 12px;text-align:left;font-weight:500;">Periodicidad</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="padding:9px 12px; border-bottom:1px solid var(--vp-border);">Plan anual de formación</td>
+          <td style="padding:9px 12px; border-bottom:1px solid var(--vp-border); font-family:'DM Mono',monospace; font-size:12px; color:var(--vp-blue);">IG-06</td>
+          <td style="padding:9px 12px; border-bottom:1px solid var(--vp-border); text-align:center;">≥ 90%</td>
+          <td style="padding:9px 12px; border-bottom:1px solid var(--vp-border); text-align:center;"><span class="badge badge-pend">10%</span></td>
+          <td style="padding:9px 12px; border-bottom:1px solid var(--vp-border);"><span class="badge badge-pend">En curso</span></td>
+          <td style="padding:9px 12px; border-bottom:1px solid var(--vp-border); color:var(--vp-muted);">Mensual</td>
+        </tr>
+        <tr>
+          <td style="padding:9px 12px; border-bottom:1px solid var(--vp-border);">Eficacia de capacitaciones</td>
+          <td style="padding:9px 12px; border-bottom:1px solid var(--vp-border); font-family:'DM Mono',monospace; font-size:12px; color:var(--vp-blue);">IG-07</td>
+          <td style="padding:9px 12px; border-bottom:1px solid var(--vp-border); text-align:center;">≥ 90%</td>
+          <td style="padding:9px 12px; border-bottom:1px solid var(--vp-border); text-align:center;"><span class="badge badge-plan">Pend. medición</span></td>
+          <td style="padding:9px 12px; border-bottom:1px solid var(--vp-border);"><span class="badge badge-plan">Sem. 2</span></td>
+          <td style="padding:9px 12px; border-bottom:1px solid var(--vp-border); color:var(--vp-muted);">Semestral</td>
+        </tr>
+        <tr>
+          <td style="padding:9px 12px; border-bottom:1px solid var(--vp-border);">Evaluación de desempeño</td>
+          <td style="padding:9px 12px; border-bottom:1px solid var(--vp-border); font-family:'DM Mono',monospace; font-size:12px; color:var(--vp-blue);">IG-08</td>
+          <td style="padding:9px 12px; border-bottom:1px solid var(--vp-border); text-align:center;">100%</td>
+          <td style="padding:9px 12px; border-bottom:1px solid var(--vp-border); text-align:center;"><span class="badge badge-pend">0%</span></td>
+          <td style="padding:9px 12px; border-bottom:1px solid var(--vp-border);"><span class="badge badge-pend">Sin iniciar</span></td>
+          <td style="padding:9px 12px; border-bottom:1px solid var(--vp-border); color:var(--vp-muted);">Anual</td>
+        </tr>
+        <tr>
+          <td style="padding:9px 12px;">Perfiles de puesto actualizados</td>
+          <td style="padding:9px 12px; font-family:'DM Mono',monospace; font-size:12px; color:var(--vp-blue);">IG-09</td>
+          <td style="padding:9px 12px; text-align:center;">100%</td>
+          <td style="padding:9px 12px; text-align:center;"><span class="badge badge-ok">91%</span></td>
+          <td style="padding:9px 12px;"><span class="badge badge-ok">En proceso</span></td>
+          <td style="padding:9px 12px; color:var(--vp-muted);">Anual</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     TAB: CONFIG
+══════════════════════════════════ -->
+<div class="page" id="tab-config">
+  <div class="grid2">
+    <div class="card">
+      <div class="card-title">Conexión a Google Sheets</div>
+      <div class="gs-form">
+        <div>
+          <label>URL del Apps Script (doGet)</label>
+          <input type="text" id="gsUrl" placeholder="https://script.google.com/macros/s/…/exec" value="">
+        </div>
+        <button class="btn-primary" onclick="saveGsUrl()">Guardar y conectar</button>
+        <div id="gsTestResult" style="font-size:12.5px; color:var(--vp-muted); margin-top:4px;"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Estado de la conexión</div>
+      <div style="font-size:13px; line-height:2; color:var(--vp-muted);">
+        <div>Estado: <strong id="cfg-estado" style="color:var(--vp-amber);">Sin configurar</strong></div>
+        <div>Última sincronización: <strong id="cfg-sync">—</strong></div>
+        <div>Fuente de datos: <strong id="cfg-fuente">Local (datos precargados)</strong></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Instrucciones para crear el Google Sheets de VALPOB</div>
+    <div class="instrucciones">
+      <p style="margin-bottom:10px; color:var(--vp-text);">Creá un nuevo Google Sheets con las siguientes hojas. Cada hoja se conecta a una pestaña del tablero.</p>
+      <ol>
+        <li>Abrí <strong>Google Sheets</strong> y creá un archivo nuevo llamado <code>RRHH_VALPOB_2026</code></li>
+        <li>Creá estas 4 hojas (solapas): <span class="tag-hoja">Formacion</span> <span class="tag-hoja">Perfiles</span> <span class="tag-hoja">Desempenio</span> <span class="tag-hoja">KPIs</span></li>
+        <li>En la hoja <span class="tag-hoja">Formacion</span> usá estas columnas: <code>ID | Tema | Categoria | DirigidoA | Meses (ENE…DIC, un estado por celda) | Responsable | Obs</code></li>
+        <li>En la hoja <span class="tag-hoja">Perfiles</span>: <code>Puesto | Area | Tipo | Formacion | ExpMin | Competencias (una por columna con nivel 0-4)</code></li>
+        <li>En la hoja <span class="tag-hoja">Desempenio</span>: <code>Puesto | Area | Puntaje | Competencias | Estado | Observaciones</code></li>
+        <li>En la hoja <span class="tag-hoja">KPIs</span>: <code>Codigo | Indicador | Meta | ValorActual | Estado | Periodo</code></li>
+        <li>Abrí <strong>Extensiones → Apps Script</strong>, pegá el código del Web App y publicalo como <strong>aplicación web</strong> con acceso para cualquier persona.</li>
+        <li>Copiá la URL generada y pegala en el campo "URL del Apps Script" arriba.</li>
+      </ol>
+      <p style="margin-top:12px; font-size:12px; color:var(--vp-muted);">💡 El tablero carga los datos en tiempo real al hacer clic en "Sincronizar". Si no hay conexión, muestra los datos precargados del plan 2026.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Código Apps Script para pegar en Google Sheets</div>
+    <div style="background:#1a2540; border-radius:8px; padding:16px 18px; font-family:'DM Mono',monospace; font-size:11.5px; color:#a8d8f0; line-height:1.8; overflow-x:auto;">
+<pre style="margin:0; color:#a8d8f0;">function doGet(e) {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const sheets = ['Formacion','Perfiles','Desempenio','KPIs'];
+  const out = {};
+  sheets.forEach(name => {
+    const sh = ss.getSheetByName(name);
+    if (!sh) return;
+    const [headers, ...rows] = sh.getDataRange().getValues();
+    out[name] = rows.map(r => {
+      const obj = {};
+      headers.forEach((h, i) => obj[h] = r[i]);
+      return obj;
+    });
+  });
+  return ContentService
+    .createTextOutput(JSON.stringify(out))
+    .setMimeType(ContentService.MimeType.JSON);
+}</pre>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+const GS_URL = 'https://script.google.com/macros/s/AKfycbwGoB4uLwAB2pmuNHH15vR33BniBt18qYj2rWUw9mau6OZbnNijyDKzXf6nAEhuJ99j-w/exec';
+const MONTHS = ['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'];
+const MONTHS_SHORT = ['E','F','M','A','M','J','J','A','S','O','N','D'];
+
+const FORMACION_DATA = [
+  {id:1, bloque:'SGC', tema:'Introducción a ISO 9001:2015\nFundamentos y estructura', cat:'SGC', dirigido:'Todo el personal', meses:{2:'✔'}, resp:'Resp. SGC', obs:'Realizado feb'},
+  {id:2, bloque:'SGC', tema:'Contexto, Partes Interesadas y FODA', cat:'SGC', dirigido:'Todo el personal / Gerencia', meses:{3:'✔'}, resp:'Resp. SGC', obs:'Realizado mar'},
+  {id:3, bloque:'SGC', tema:'Riesgos y Oportunidades', cat:'SGC', dirigido:'Todo el personal / Gerencia', meses:{3:'✔'}, resp:'Resp. SGC', obs:'Realizado mar'},
+  {id:4, bloque:'SGC', tema:'Política de Calidad y Objetivos del SGC', cat:'SGC', dirigido:'Todo el personal', meses:{4:'◆'}, resp:'Resp. SGC', obs:''},
+  {id:5, bloque:'SGC', tema:'Control Documental\nAcceso al SGC', cat:'SGC', dirigido:'Secretaría / Admin', meses:{4:'◆'}, resp:'Resp. SGC / RRHH', obs:''},
+  {id:6, bloque:'SGC', tema:'Procedimientos operativos del SGC', cat:'SGC', dirigido:'Responsables de proceso', meses:{5:'◆',6:'◆'}, resp:'Resp. SGC', obs:'Por proceso'},
+  {id:7, bloque:'SGC', tema:'Gestión del Cambio', cat:'SGC', dirigido:'Gerencia + Responsables', meses:{5:'◆'}, resp:'Resp. SGC', obs:''},
+  {id:8, bloque:'SGC', tema:'Auditoría Interna ISO 9001', cat:'SGC', dirigido:'Auditores internos', meses:{7:'◆'}, resp:'Consultor / Resp. SGC', obs:''},
+  {id:9, bloque:'SGC', tema:'Satisfacción del cliente y encuesta post-atención', cat:'SGC', dirigido:'Recepción / Secretaría', meses:{5:'◆'}, resp:'Resp. SGC', obs:''},
+  {id:10, bloque:'SGC', tema:'Revisión por la Dirección', cat:'SGC', dirigido:'Gerencia + Responsables', meses:{10:'◆'}, resp:'Resp. SGC', obs:''},
+  {id:11, bloque:'SYH', tema:'Inducción de Ingreso', cat:'SYH', dirigido:'Personal nuevo', meses:{1:'◆',2:'◆',3:'◆',4:'◆',5:'◆',6:'◆',7:'◆',8:'◆',9:'◆',10:'◆',11:'◆',12:'◆'}, resp:'Resp. S&H', obs:'Continua'},
+  {id:12, bloque:'SYH', tema:'Ergonomía y pausas activas', cat:'SYH', dirigido:'Personal operativo', meses:{3:'◆'}, resp:'Resp. S&H', obs:''},
+  {id:13, bloque:'SYH', tema:'Normas S&H — Ley 19587 / 24557', cat:'SYH', dirigido:'Todo el personal', meses:{4:'◆'}, resp:'Resp. S&H', obs:''},
+  {id:14, bloque:'SYH', tema:'Evaluación de riesgos — actos y condiciones inseguras', cat:'SYH', dirigido:'Personal operativo / taller', meses:{5:'◆'}, resp:'Resp. S&H', obs:''},
+  {id:15, bloque:'SYH', tema:'Protección contra incendios', cat:'SYH', dirigido:'Todo el personal', meses:{6:'◆'}, resp:'Resp. S&H', obs:'Teórico-práctico'},
+  {id:16, bloque:'SYH', tema:'Primeros auxilios básicos — RCP / DEA', cat:'SYH', dirigido:'Todo el personal', meses:{7:'◆'}, resp:'Resp. S&H / Médico', obs:''},
+  {id:17, bloque:'SYH', tema:'Gestión de residuos e incidentes ambientales', cat:'SYH', dirigido:'Todo el personal', meses:{8:'◆'}, resp:'Resp. S&H', obs:''},
+  {id:18, bloque:'SYH', tema:'Riesgo eléctrico y ruido', cat:'SYH', dirigido:'Personal técnico / taller', meses:{9:'◆'}, resp:'Resp. S&H', obs:''},
+  {id:19, bloque:'SYH', tema:'Exposición a agentes químicos — Golpe de calor', cat:'SYH', dirigido:'Personal de campo', meses:{10:'◆'}, resp:'Resp. S&H', obs:''},
+  {id:20, bloque:'SYH', tema:'Consumo problemático (alcohol, drogas, tabaco)', cat:'SYH', dirigido:'Todo el personal', meses:{11:'◆'}, resp:'Resp. S&H / Médico', obs:''},
+  {id:21, bloque:'SYH', tema:'Síntomas de urgencia médica (ACV, infarto)', cat:'SYH', dirigido:'Todo el personal', meses:{11:'◆'}, resp:'Médico Laboral', obs:''},
+  {id:22, bloque:'SYH', tema:'Manipulación de equipos y herramientas', cat:'SYH', dirigido:'Personal técnico / taller', meses:{9:'◆'}, resp:'Resp. S&H', obs:''},
+  {id:23, bloque:'SYH', tema:'Alimentación saludable en turnos', cat:'SYH', dirigido:'Todo el personal', meses:{10:'◆'}, resp:'Médico Laboral', obs:''},
+  {id:24, bloque:'SYH', tema:'Roles de emergencia y simulacros', cat:'SYH', dirigido:'Todo el personal', meses:{4:'◆',8:'◆'}, resp:'Resp. S&H', obs:'2 veces/año'},
+  {id:25, bloque:'HAB', tema:'Comunicación efectiva y trabajo en equipo', cat:'HAB', dirigido:'Todo el personal', meses:{4:'◆'}, resp:'Resp. RRHH', obs:''},
+  {id:26, bloque:'HAB', tema:'Liderazgo y delegación', cat:'HAB', dirigido:'Gerencia + Responsables', meses:{6:'◆'}, resp:'Consultor', obs:''},
+  {id:27, bloque:'HAB', tema:'Planificación y control de gestión (KPIs)', cat:'HAB', dirigido:'Gerencia + Responsables', meses:{8:'◆'}, resp:'Consultor', obs:''},
+  {id:28, bloque:'HAB', tema:'Herramientas informáticas — Excel / sistemas', cat:'HAB', dirigido:'Administrativos / Secretaría', meses:{5:'◆',6:'◆'}, resp:'Externo', obs:''},
+  {id:29, bloque:'HAB', tema:'Gestión del riesgo y toma de decisiones', cat:'HAB', dirigido:'Gerencia + Responsables', meses:{9:'◆'}, resp:'Resp. SGC', obs:''},
+  {id:30, bloque:'HAB', tema:'Atención al cliente y satisfacción', cat:'HAB', dirigido:'Recepción / Secretaría', meses:{5:'◆'}, resp:'Resp. SGC / RRHH', obs:''},
+  {id:31, bloque:'HAB', tema:'Orden y limpieza — 5S en recepción', cat:'HAB', dirigido:'Secretaría / Recepción', meses:{4:'●'}, resp:'RRHH / S&H', obs:''},
+];
+
+const PERFILES_DATA = [
+  {puesto:'Gerente General', area:'Gerencia', tipo:'Gerencia', formacion:'Universitario', exp:'5 años', comps:{Responsabilidad:4,Compromiso:4,'Visión estratégica':4,'Toma de decisiones':4,Liderazgo:3,Proactividad:4}},
+  {puesto:'Sub Gerente', area:'Gerencia', tipo:'Gerencia', formacion:'Universitario', exp:'5 años', comps:{Responsabilidad:4,Compromiso:4,'Visión estratégica':4,'Toma de decisiones':4,Liderazgo:3,Proactividad:4}},
+  {puesto:'Resp. Sistema de Gestión', area:'Sistema de Gestión', tipo:'Jefatura', formacion:'Secundario completo', exp:'3 años', comps:{Compromiso:4,'Comunicación efectiva':4,'Trabajo en equipo':4,'Cap. coordinación':4,Liderazgo:3,Proactividad:3}},
+  {puesto:'Resp. de RRHH', area:'RRHH', tipo:'Jefatura', formacion:'Terciario', exp:'1 año', comps:{Profesionalismo:3,Responsabilidad:3,Proactividad:3,'Tools TIC':3,'Conocimientos técn.':3,Compromiso:2}},
+  {puesto:'Resp. de S&H', area:'Seguridad e Higiene', tipo:'Jefatura', formacion:'Universitario', exp:'3 años', comps:{Profesionalismo:3,Responsabilidad:3,'Pens. analítico':3,'Plan. y control':3,'Tools TIC':3,'Conocimientos técn.':3}},
+  {puesto:'Técnico de S&H', area:'Seguridad e Higiene', tipo:'Técnico', formacion:'Terciario', exp:'1 año', comps:{Profesionalismo:3,'Tools TIC':3,Responsabilidad:2,Compromiso:2,Adaptabilidad:2,Proactividad:2}},
+  {puesto:'Resp. Área Técnica', area:'Técnica / Operaciones', tipo:'Jefatura', formacion:'Terciario', exp:'3 años', comps:{Profesionalismo:3,Liderazgo:3,'Plan. y control':3,'Conocimientos técn.':3,Proactividad:3,'Neg./Coord.':3}},
+  {puesto:'Resp. de Taller', area:'Técnica / Operaciones', tipo:'Jefatura', formacion:'Secundario', exp:'1 año', comps:{'Cap. respuesta':3,Proactividad:3,Profesionalismo:2,Responsabilidad:2,Compromiso:2,Adaptabilidad:2}},
+  {puesto:'Resp. Compras y Contrat.', area:'Compras', tipo:'Jefatura', formacion:'Terciario', exp:'1 año', comps:{Profesionalismo:3,'Pens. analítico':3,Negociación:3,'Conocimientos técn.':3,Proactividad:3,Responsabilidad:3}},
+  {puesto:'Resp. Contabilidad', area:'Contabilidad', tipo:'Jefatura', formacion:'Universitario', exp:'3 años', comps:{Profesionalismo:3,'Res. problemas':3,'Pens. analítico':3,'Conocimientos técn.':3,'Tools TIC':3,Responsabilidad:3}},
+];
+
+const DESEMPENIO_DATA = [
+  {puesto:'Gerente General', area:'Gerencia', puntaje:null, comps:'Responsabilidad, Liderazgo, Visión estratégica', estado:'Sin evaluar', obs:'Programar Jul 2026'},
+  {puesto:'Sub Gerente', area:'Gerencia', puntaje:null, comps:'Responsabilidad, Liderazgo, Coordinación', estado:'Sin evaluar', obs:'Programar Jul 2026'},
+  {puesto:'Resp. Sistema de Gestión', area:'SGC', puntaje:null, comps:'Compromiso, Comunicación, Coordinación', estado:'Sin evaluar', obs:''},
+  {puesto:'Resp. de RRHH', area:'RRHH', puntaje:null, comps:'Profesionalismo, Desarrollo de personas', estado:'Sin evaluar', obs:''},
+  {puesto:'Resp. de S&H', area:'S&H', puntaje:null, comps:'Planificación, Conocimientos técn.', estado:'Sin evaluar', obs:''},
+  {puesto:'Técnico de S&H', area:'S&H', puntaje:null, comps:'Responsabilidad, Conocimiento industria', estado:'Sin evaluar', obs:''},
+  {puesto:'Resp. Área Técnica', area:'Técnica', puntaje:null, comps:'Liderazgo, Planificación, Técnico', estado:'Sin evaluar', obs:''},
+  {puesto:'Resp. de Taller', area:'Técnica', puntaje:null, comps:'Cap. respuesta, Proactividad', estado:'Sin evaluar', obs:''},
+  {puesto:'Resp. Compras y Contrat.', area:'Compras', puntaje:null, comps:'Negociación, Análisis, Técnico', estado:'Sin evaluar', obs:''},
+  {puesto:'Analista de Compras', area:'Compras', puntaje:null, comps:'Análisis, Responsabilidad', estado:'Sin evaluar', obs:''},
+  {puesto:'Resp. Contabilidad', area:'Contabilidad', puntaje:null, comps:'Análisis, Resolución de problemas', estado:'Sin evaluar', obs:''},
+];
+
+function showTab(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  event.target.classList.add('active');
+}
+
+function renderFormacion() {
+  const filtBloque = document.getElementById('filtroBloque').value;
+  const filtEstado = document.getElementById('filtroEstado').value;
+  const filtMes    = document.getElementById('filtroMes').value;
+  const tbody = document.getElementById('formTbody');
+  tbody.innerHTML = '';
+
+  const bloques = [{key:'SGC',label:'Bloque 1 — SGC / Calidad ISO 9001'},{key:'SYH',label:'Bloque 2 — Seguridad e Higiene'},{key:'HAB',label:'Bloque 3 — Habilidades y Competencias'}];
+  const catBadge = {SGC:'badge-sgc', SYH:'badge-syh', HAB:'badge-hab'};
+  const catLabel = {SGC:'SGC / Calidad', SYH:'S&H', HAB:'Habilidades'};
+
+  bloques.forEach(bl => {
+    if (filtBloque && filtBloque !== bl.key) return;
+    let rows = FORMACION_DATA.filter(d => d.bloque === bl.key);
+    if (filtEstado) rows = rows.filter(d => Object.values(d.meses).includes(filtEstado));
+    if (filtMes)    rows = rows.filter(d => d.meses[parseInt(filtMes)]);
+    if (!rows.length) return;
+
+    const hRow = document.createElement('tr');
+    hRow.className = 'bloque-header';
+    hRow.innerHTML = `<td colspan="17">${bl.label}</td>`;
+    tbody.appendChild(hRow);
+
+    rows.forEach(d => {
+      const tr = document.createElement('tr');
+      let mesCells = '';
+      for (let m = 1; m <= 12; m++) {
+        const v = d.meses[m] || '';
+        let cls = '';
+        if (v==='✔') cls='mark-ok'; else if (v==='◆') cls='mark-plan'; else if (v==='●') cls='mark-pend';
+        mesCells += `<td class="month-cell"><span class="${cls}">${v}</span></td>`;
+      }
+      tr.innerHTML = `
+        <td style="text-align:center;font-weight:600;color:var(--vp-muted)">${d.id}</td>
+        <td style="white-space:pre-line;line-height:1.4">${d.tema}</td>
+        <td><span class="badge ${catBadge[d.bloque]}">${catLabel[d.bloque]}</span></td>
+        <td style="font-size:12px;color:var(--vp-muted)">${d.dirigido}</td>
+        ${mesCells}
+        <td style="font-size:11.5px;color:var(--vp-muted)">${d.resp}</td>`;
+      tbody.appendChild(tr);
+    });
+  });
+}
+
+function renderPerfiles() {
+  const grid = document.getElementById('perfilesGrid');
+  grid.innerHTML = '';
+  PERFILES_DATA.forEach(p => {
+    const initials = p.puesto.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+    let compsHtml = Object.entries(p.comps).map(([k,v]) => {
+      let dots = '';
+      for (let i=1;i<=4;i++) dots+=`<div class="comp-dot ${i<=v?'filled':'empty'}"></div>`;
+      return `<div class="comp-item"><div class="comp-dots">${dots}</div><span style="font-size:11px;color:var(--vp-muted)">${k}</span></div>`;
+    }).join('');
+    grid.innerHTML += `
+      <div class="perfil-card">
+        <div class="perfil-head">
+          <div class="perfil-avatar">${initials}</div>
+          <div>
+            <div class="perfil-puesto">${p.puesto}</div>
+            <div class="perfil-area">${p.area} · ${p.tipo}</div>
+          </div>
+        </div>
+        <div class="perfil-body">
+          <div class="perfil-row"><span class="perfil-key">Formación mín.</span><span class="perfil-val">${p.formacion}</span></div>
+          <div class="perfil-row"><span class="perfil-key">Exp. mínima</span><span class="perfil-val">${p.exp}</span></div>
+          <div style="margin-top:10px; font-size:11px; color:var(--vp-muted); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:6px;">Competencias requeridas</div>
+          <div class="comp-grid">${compsHtml}</div>
+        </div>
+      </div>`;
+  });
+}
+
+function renderDesempenio() {
+  const tbody = document.getElementById('desempenioTbody');
+  tbody.innerHTML = '';
+  DESEMPENIO_DATA.forEach(d => {
+    const scoreHtml = d.puntaje
+      ? `<div class="score-circle score-${d.puntaje}" style="margin:auto">${d.puntaje}</div>`
+      : `<div class="score-circle score-nd" style="margin:auto">—</div>`;
+    tbody.innerHTML += `
+      <tr>
+        <td><strong style="color:var(--vp-navy)">${d.puesto}</strong></td>
+        <td style="color:var(--vp-muted);font-size:12px">${d.area}</td>
+        <td style="text-align:center">${scoreHtml}</td>
+        <td style="font-size:12px;color:var(--vp-muted)">${d.comps}</td>
+        <td><span class="badge badge-pend">${d.estado}</span></td>
+        <td style="font-size:12px;color:var(--vp-muted)">${d.obs}</td>
+      </tr>`;
+  });
+}
+
+function buildCharts() {
+  const areasData = {labels:['Gerencia','S&H','Téc/Op','SGC','RRHH','Compras','Contab.'], values:[2,2,2,1,1,2,1]};
+  const aColors = ['#1F3864','#2F5496','#4FA8D8','#375623','#B87333','#BDD7EE','#5a6680'];
+  const aChart = document.getElementById('chartAreas');
+  if (aChart) {
+    new Chart(aChart, {
+      type:'doughnut',
+      data:{labels:areasData.labels, datasets:[{data:areasData.values, backgroundColor:aColors, borderWidth:2, borderColor:'#fff'}]},
+      options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}}
+    });
+    const leg = document.getElementById('legendAreas');
+    areasData.labels.forEach((l,i) => {
+      leg.innerHTML += `<span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:2px;background:${aColors[i]}"></span>${l} (${areasData.values[i]})</span>`;
+    });
+  }
+
+  const mesData = [0,1,4,6,8,4,4,5,5,4,3,1];
+  const mChart = document.getElementById('chartFormMes');
+  if (mChart) {
+    new Chart(mChart, {
+      type:'bar',
+      data:{labels:MONTHS, datasets:[{label:'Actividades', data:mesData, backgroundColor:'#2F5496', borderRadius:4}]},
+      options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true, ticks:{stepSize:1}}}}
+    });
+  }
+
+  const kpiChart = document.getElementById('chartKpiForm');
+  if (kpiChart) {
+    new Chart(kpiChart, {
+      type:'bar',
+      data:{labels:MONTHS, datasets:[
+        {label:'Planificadas', data:mesData, backgroundColor:'rgba(47,84,150,0.25)', borderRadius:4},
+        {label:'Realizadas', data:[0,1,2,0,0,0,0,0,0,0,0,0], backgroundColor:'#375623', borderRadius:4}
+      ]},
+      options:{responsive:true, maintainAspectRatio:false, scales:{y:{beginAtZero:true, ticks:{stepSize:1}}}, plugins:{legend:{display:false}}}
+    });
+  }
+
+  const catChart = document.getElementById('chartCategoria');
+  if (catChart) {
+    new Chart(catChart, {
+      type:'bar',
+      data:{labels:['SGC / Calidad','Seguridad & Higiene','Habilidades'],
+            datasets:[{data:[10,14,7], backgroundColor:['#2F5496','#375623','#B87333'], borderRadius:6}]},
+      options:{responsive:true, maintainAspectRatio:false, indexAxis:'y', plugins:{legend:{display:false}}, scales:{x:{beginAtZero:true, ticks:{stepSize:2}}}}
+    });
+  }
+}
+
+function saveGsUrl() {
+  document.getElementById('gsTestResult').textContent = 'URL hardcodeada: ' + GS_URL;
+  syncSheets();
+}
+
+async function syncSheets() {
+  const url = GS_URL;
+  if (!url) {
+    document.getElementById('gsStatusText').textContent = 'Sin conexión a Sheets';
+    return;
+  }
+  document.getElementById('gsStatusText').textContent = 'Sincronizando…';
+  try {
+    const res = await fetch(url);
+    const data = await res.json();
+    document.getElementById('gsDot').classList.remove('offline');
+    document.getElementById('gsStatusText').textContent = 'Conectado a Google Sheets';
+    document.getElementById('cfg-estado').textContent = 'Conectado';
+    document.getElementById('cfg-estado').style.color = '#375623';
+    document.getElementById('cfg-sync').textContent = new Date().toLocaleString('es-AR');
+    document.getElementById('cfg-fuente').textContent = 'Google Sheets en vivo';
+    if (data.Formacion) applyFormacionData(data.Formacion);
+    if (data.Desempenio) applyDesempenioData(data.Desempenio);
+  } catch(e) {
+    document.getElementById('gsStatusText').textContent = 'Error de conexión';
+  }
+}
+
+function applyFormacionData(rows) {}
+function applyDesempenioData(rows) {}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const inp = document.getElementById('gsUrl');
+  if (inp) inp.value = GS_URL;
+  renderFormacion();
+  renderPerfiles();
+  renderDesempenio();
+  buildCharts();
+  syncSheets();
+});
+</script>
+</body>
+</html>
