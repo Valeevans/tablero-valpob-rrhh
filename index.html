@@ -1,0 +1,1330 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tablero RRHH — Grupo VALPOB</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy:#1F3864; --blue:#2F5496; --light:#BDD7EE; --accent:#4FA8D8;
+  --green:#375623; --green-bg:#E2EFDA; --amber:#B87333; --amber-bg:#FFF2CC;
+  --red:#C00000; --red-bg:#FFCCCC; --gray:#F5F6FA; --border:#DDE3ED;
+  --text:#1a2540; --muted:#5a6680; --white:#ffffff;
+  --tab-h:48px; --header-h:64px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;background:#EEF1F8;color:var(--text);min-height:100vh;}
+.header{background:var(--navy);height:var(--header-h);display:flex;align-items:center;padding:0 28px;gap:16px;position:sticky;top:0;z-index:100;}
+.header-logo{width:36px;height:36px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:14px;color:white;}
+.header-title{color:white;font-size:17px;font-weight:500;}
+.header-sub{color:rgba(255,255,255,0.5);font-size:12px;}
+.header-right{margin-left:auto;display:flex;align-items:center;gap:12px;}
+.gs-status{font-size:12px;color:rgba(255,255,255,0.6);display:flex;align-items:center;gap:6px;}
+.gs-dot{width:7px;height:7px;border-radius:50%;background:#4caf50;}
+.gs-dot.offline{background:#ff9800;}
+.btn-sync{background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);color:white;padding:6px 14px;border-radius:6px;font-size:12px;font-family:'DM Sans',sans-serif;cursor:pointer;transition:background .15s;}
+.btn-sync:hover{background:rgba(255,255,255,0.2);}
+.tabs-bar{background:var(--white);border-bottom:1px solid var(--border);display:flex;padding:0 28px;gap:4px;position:sticky;top:var(--header-h);z-index:99;overflow-x:auto;}
+.tab-btn{padding:0 16px;height:var(--tab-h);border:none;background:none;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;white-space:nowrap;}
+.tab-btn:hover{color:var(--blue);}
+.tab-btn.active{color:var(--navy);font-weight:500;border-bottom-color:var(--accent);}
+.page{display:none;padding:28px;max-width:1300px;margin:0 auto;}
+.page.active{display:block;}
+.kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;margin-bottom:24px;}
+.kpi-card{background:var(--white);border-radius:10px;border:1px solid var(--border);padding:18px 20px;}
+.kpi-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;}
+.kpi-val{font-size:28px;font-weight:600;color:var(--navy);line-height:1;}
+.kpi-sub{font-size:11.5px;color:var(--muted);margin-top:6px;}
+.kpi-card.green .kpi-val{color:var(--green);}
+.kpi-card.amber .kpi-val{color:var(--amber);}
+.kpi-card.red .kpi-val{color:var(--red);}
+.section-title{font-size:12px;font-weight:600;color:var(--navy);text-transform:uppercase;letter-spacing:.8px;margin-bottom:14px;padding-bottom:8px;border-bottom:1.5px solid var(--border);}
+.card{background:var(--white);border-radius:10px;border:1px solid var(--border);padding:20px 24px;margin-bottom:20px;}
+.card-title{font-size:13.5px;font-weight:500;color:var(--navy);margin-bottom:16px;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:20px;}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px;margin-bottom:20px;}
+@media(max-width:800px){.grid2,.grid3{grid-template-columns:1fr;}}
+.form-table{width:100%;border-collapse:collapse;font-size:12.5px;}
+.form-table th{background:var(--navy);color:white;padding:8px 10px;text-align:left;font-weight:500;font-size:11.5px;white-space:nowrap;}
+.form-table td{padding:8px 10px;border-bottom:1px solid var(--border);vertical-align:middle;}
+.form-table tr:hover td{background:var(--gray);}
+.form-table tr.bloque-header td{background:#EEF1F8;font-weight:600;font-size:11px;color:var(--blue);text-transform:uppercase;letter-spacing:.5px;padding:6px 10px;}
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:500;}
+.badge-ok{background:var(--green-bg);color:var(--green);}
+.badge-plan{background:var(--light);color:var(--navy);}
+.badge-pend{background:var(--amber-bg);color:var(--amber);}
+.badge-sgc{background:#E8EEF8;color:var(--blue);}
+.badge-syh{background:var(--green-bg);color:var(--green);}
+.badge-hab{background:var(--amber-bg);color:#7a5200;}
+.month-cell{text-align:center;min-width:26px;}
+.mark-ok{color:var(--green);font-weight:700;font-size:14px;}
+.mark-plan{color:var(--blue);font-size:13px;}
+.mark-pend{color:var(--amber);font-size:13px;}
+.prog-bar-bg{flex:1;background:#e8ecf3;border-radius:4px;height:7px;}
+.prog-bar-fill{height:100%;border-radius:4px;background:var(--accent);transition:width .6s ease;}
+.prog-bar-fill.green{background:#4caf50;}
+.prog-bar-fill.amber{background:#f4a228;}
+.prog-bar-fill.red{background:var(--red);}
+.perfil-card{background:var(--white);border:1px solid var(--border);border-radius:10px;overflow:hidden;}
+.perfil-head{background:var(--navy);color:white;padding:14px 18px;display:flex;align-items:center;gap:12px;}
+.perfil-avatar{width:36px;height:36px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:600;font-size:13px;color:white;flex-shrink:0;}
+.perfil-puesto{font-size:14px;font-weight:500;}
+.perfil-area{font-size:11.5px;color:rgba(255,255,255,.6);margin-top:2px;}
+.perfil-body{padding:14px 18px;font-size:12.5px;}
+.perfil-row{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);}
+.perfil-row:last-child{border-bottom:none;}
+.perfil-key{color:var(--muted);}
+.perfil-val{font-weight:500;color:var(--navy);}
+.comp-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:10px;font-size:12px;}
+.comp-item{display:flex;align-items:center;gap:6px;}
+.comp-dots{display:flex;gap:2px;}
+.comp-dot{width:8px;height:8px;border-radius:2px;}
+.comp-dot.filled{background:var(--accent);}
+.comp-dot.empty{background:#dde3ed;}
+.desempenio-table{width:100%;border-collapse:collapse;font-size:12.5px;}
+.desempenio-table th{background:var(--navy);color:white;padding:9px 12px;text-align:left;font-size:12px;font-weight:500;}
+.desempenio-table td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:middle;}
+.desempenio-table tr:hover td{background:var(--gray);}
+.score-circle{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:13px;color:white;}
+.score-5{background:#1b7b3a;}.score-4{background:#4caf50;}.score-3{background:#f4a228;}
+.score-2{background:#e05a28;}.score-1{background:#c00000;}.score-nd{background:#b0b8c8;}
+.chart-wrap{position:relative;width:100%;}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:500;align-items:center;justify-content:center;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--white);border-radius:12px;padding:28px;width:min(560px,95vw);max-height:90vh;overflow-y:auto;position:relative;}
+.modal-title{font-size:16px;font-weight:600;color:var(--navy);margin-bottom:20px;}
+.modal-close{position:absolute;top:16px;right:18px;background:none;border:none;font-size:20px;cursor:pointer;color:var(--muted);line-height:1;}
+.modal-close:hover{color:var(--text);}
+.f-group{margin-bottom:14px;}
+.f-label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px;font-weight:500;}
+.f-input,.f-select,.f-textarea{width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text);background:var(--white);}
+.f-input:focus,.f-select:focus,.f-textarea:focus{outline:none;border-color:var(--accent);}
+.f-textarea{resize:vertical;min-height:70px;}
+.f-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.btn-primary{padding:10px 22px;background:var(--blue);color:white;border:none;border-radius:7px;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:500;cursor:pointer;transition:background .15s;}
+.btn-primary:hover{background:var(--navy);}
+.btn-secondary{padding:10px 18px;background:transparent;color:var(--muted);border:1px solid var(--border);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;}
+.btn-secondary:hover{background:var(--gray);}
+.btn-sm{padding:5px 12px;font-size:12px;border-radius:5px;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500;}
+.btn-cargar{background:#E8EEF8;color:var(--blue);}
+.btn-cargar:hover{background:var(--light);}
+.btn-eval{background:var(--green-bg);color:var(--green);}
+.btn-eval:hover{background:#c8e6b8;}
+.btn-eficacia{background:var(--amber-bg);color:var(--amber);}
+.btn-eficacia:hover{background:#ffe7a0;}
+.form-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:18px;padding-top:14px;border-top:1px solid var(--border);}
+.toast{position:fixed;bottom:28px;right:28px;background:var(--navy);color:white;padding:12px 20px;border-radius:8px;font-size:13px;z-index:999;opacity:0;transform:translateY(10px);transition:all .3s;pointer-events:none;}
+.toast.show{opacity:1;transform:translateY(0);}
+.toast.error{background:var(--red);}
+.comp-eval-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;}
+.comp-eval-item{display:flex;align-items:center;justify-content:space-between;font-size:12px;padding:6px 8px;background:var(--gray);border-radius:6px;}
+.comp-eval-item label{color:var(--muted);}
+.comp-score-select{width:60px;padding:3px 6px;border:1px solid var(--border);border-radius:4px;font-size:12px;}
+</style>
+</head>
+<body>
+
+<div id="loginScreen" style="display:flex;position:fixed;inset:0;background:#EEF1F8;z-index:9999;align-items:center;justify-content:center;">
+  <div style="background:white;border-radius:14px;border:1px solid #DDE3ED;padding:40px 36px;width:min(380px,92vw);text-align:center;box-shadow:0 4px 24px rgba(31,56,100,.10);">
+    <div style="width:52px;height:52px;background:#1F3864;border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px;color:white;margin:0 auto 20px;">VP</div>
+    <div style="font-size:18px;font-weight:600;color:#1a2540;margin-bottom:4px;">Tablero RRHH</div>
+    <div style="font-size:13px;color:#5a6680;margin-bottom:28px;">Grupo VALPOB S.R.L.</div>
+    <div style="text-align:left;margin-bottom:14px;">
+      <label style="display:block;font-size:12px;color:#5a6680;font-weight:500;margin-bottom:6px;">Contraseña</label>
+      <input type="password" id="loginInput" placeholder="Ingresá la contraseña"
+        style="width:100%;padding:10px 14px;border:1px solid #DDE3ED;border-radius:8px;font-size:14px;font-family:'DM Sans',sans-serif;color:#1a2540;outline:none;"
+        onkeydown="if(event.key==='Enter') checkLogin()"
+        oninput="document.getElementById('loginError').style.display='none'">
+      <div id="loginError" style="display:none;color:#C00000;font-size:12px;margin-top:6px;">Contraseña incorrecta.</div>
+    </div>
+    <button onclick="checkLogin()"
+      style="width:100%;padding:11px;background:#2F5496;color:white;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;">
+      Ingresar
+    </button>
+  </div>
+</div>
+
+<script>
+(function() {
+  const KEY = 'valpob_auth';
+  const PWD = 'Valpob2026';
+  if (sessionStorage.getItem(KEY) === '1') {
+    document.getElementById('loginScreen').style.display = 'none';
+  }
+  window.checkLogin = function() {
+    const val = document.getElementById('loginInput').value;
+    if (val === PWD) {
+      sessionStorage.setItem(KEY, '1');
+      document.getElementById('loginScreen').style.display = 'none';
+    } else {
+      document.getElementById('loginError').style.display = 'block';
+      document.getElementById('loginInput').value = '';
+      document.getElementById('loginInput').focus();
+    }
+  };
+})();
+</script>
+
+<div class="header">
+  <div class="header-logo">VP</div>
+  <div>
+    <div class="header-title">Tablero RRHH — Grupo VALPOB S.R.L.</div>
+    <div class="header-sub">Panel de gestión de personas · 2026</div>
+  </div>
+  <div class="header-right">
+    <div class="gs-status" id="gsStatus">
+      <div class="gs-dot offline" id="gsDot"></div>
+      <span id="gsStatusText">Conectando…</span>
+    </div>
+    <button class="btn-sync" onclick="syncSheets()">↻ Sincronizar</button>
+  </div>
+</div>
+
+<div class="tabs-bar">
+  <button class="tab-btn active" onclick="showTab('resumen',this)">Resumen</button>
+  <button class="tab-btn" onclick="showTab('formacion',this)">Plan de formación</button>
+  <button class="tab-btn" onclick="showTab('perfiles',this)">Perfiles</button>
+  <button class="tab-btn" onclick="showTab('desempenio',this)">Desempeño</button>
+  <button class="tab-btn" onclick="showTab('kpis',this)">KPIs de RRHH</button>
+  <button class="tab-btn" onclick="showTab('carga',this)">📝 Cargar datos</button>
+</div>
+
+<!-- RESUMEN -->
+<div class="page active" id="tab-resumen">
+  <div class="kpi-row">
+    <div class="kpi-card"><div class="kpi-label">Personal activo</div><div class="kpi-val" id="r-puestos-total">15</div><div class="kpi-sub">puestos cubiertos</div></div>
+    <div class="kpi-card green"><div class="kpi-label">Formación completada</div><div class="kpi-val" id="r-form-pct">—</div><div class="kpi-sub" id="r-form-sub">cargando…</div></div>
+    <div class="kpi-card amber"><div class="kpi-label">Pendientes año</div><div class="kpi-val" id="r-form-pend">—</div><div class="kpi-sub">actividades</div></div>
+    <div class="kpi-card"><div class="kpi-label">Perfiles documentados</div><div class="kpi-val" id="r-perfiles-doc">15</div><div class="kpi-sub" id="r-perfiles-sub">de 15 puestos</div></div>
+    <div class="kpi-card"><div class="kpi-label">Evaluaciones desempeño</div><div class="kpi-val" id="r-eval-pct">—</div><div class="kpi-sub" id="r-eval-sub">cargando…</div></div>
+  </div>
+  <div class="grid2">
+    <div class="card">
+      <div class="card-title">Avance plan de formación por bloque</div>
+      <div style="display:flex;flex-direction:column;gap:12px;" id="resumen-bloques">
+        <div style="color:var(--muted);font-size:13px;">Cargando datos…</div>
+      </div>
+    </div>
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+        <div class="card-title" style="margin-bottom:0">Alertas y próximas acciones</div>
+        <button class="btn-sm btn-cargar" onclick="openModalAlertas()">✏️ Editar alertas</button>
+      </div>
+      <div id="alertas" style="display:flex;flex-direction:column;gap:10px;font-size:13px;"></div>
+    </div>
+  </div>
+  <div class="grid2">
+    <div class="card">
+      <div class="card-title">Actividades por mes — 2026</div>
+      <div class="chart-wrap" style="height:200px;"><canvas id="chartFormMes"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Personal por área</div>
+      <div class="chart-wrap" style="height:200px;"><canvas id="chartAreas"></canvas></div>
+      <div id="legendAreas" style="display:flex;flex-wrap:wrap;gap:10px;font-size:11.5px;margin-top:10px;color:var(--muted);"></div>
+    </div>
+  </div>
+</div>
+
+<!-- FORMACION -->
+<div class="page" id="tab-formacion">
+  <div class="kpi-row" style="grid-template-columns:repeat(4,1fr);">
+    <div class="kpi-card green"><div class="kpi-label">Realizadas</div><div class="kpi-val" id="f-realizadas">—</div><div class="kpi-sub">actividades ✔</div></div>
+    <div class="kpi-card"><div class="kpi-label">Planificadas</div><div class="kpi-val" id="f-planificadas">—</div><div class="kpi-sub">actividades ◆</div></div>
+    <div class="kpi-card amber"><div class="kpi-label">A confirmar</div><div class="kpi-val" id="f-confirmar">—</div><div class="kpi-sub">actividades ●</div></div>
+    <div class="kpi-card"><div class="kpi-label">Total</div><div class="kpi-val" id="f-total">—</div><div class="kpi-sub">plan 2026</div></div>
+  </div>
+  <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;align-items:center;">
+    <select class="f-select" style="width:auto" id="filtroBloque" onchange="renderFormacion()">
+      <option value="">Todos los bloques</option>
+      <option value="SGC">SGC / Calidad</option>
+      <option value="SYH">Seguridad e Higiene</option>
+      <option value="HAB">Habilidades</option>
+    </select>
+    <select class="f-select" style="width:auto" id="filtroEstado" onchange="renderFormacion()">
+      <option value="">Todos los estados</option>
+      <option value="✔">Realizadas</option>
+      <option value="◆">Planificadas</option>
+      <option value="●">A confirmar</option>
+    </select>
+    <select class="f-select" style="width:auto" id="filtroMes" onchange="renderFormacion()">
+      <option value="">Todos los meses</option>
+      <option value="1">Enero</option><option value="2">Febrero</option><option value="3">Marzo</option>
+      <option value="4">Abril</option><option value="5">Mayo</option><option value="6">Junio</option>
+      <option value="7">Julio</option><option value="8">Agosto</option><option value="9">Septiembre</option>
+      <option value="10">Octubre</option><option value="11">Noviembre</option><option value="12">Diciembre</option>
+    </select>
+  </div>
+  <div class="card" style="padding:0;overflow:hidden;">
+    <table class="form-table">
+      <thead><tr>
+        <th style="width:30px">N°</th><th>Actividad</th><th>Cat.</th><th>Dirigido a</th>
+        <th class="month-cell">E</th><th class="month-cell">F</th><th class="month-cell">M</th>
+        <th class="month-cell">A</th><th class="month-cell">M</th><th class="month-cell">J</th>
+        <th class="month-cell">J</th><th class="month-cell">A</th><th class="month-cell">S</th>
+        <th class="month-cell">O</th><th class="month-cell">N</th><th class="month-cell">D</th>
+        <th>Responsable</th><th style="width:80px">Acción</th>
+      </tr></thead>
+      <tbody id="formTbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- PERFILES -->
+<div class="page" id="tab-perfiles">
+  <div class="kpi-row" style="grid-template-columns:repeat(3,1fr);">
+    <div class="kpi-card green"><div class="kpi-label">Documentados</div><div class="kpi-val" id="p-documentados">15</div><div class="kpi-sub" id="p-doc-sub">de 15 puestos</div></div>
+    <div class="kpi-card"><div class="kpi-label">Competencias</div><div class="kpi-val" id="p-competencias">—</div><div class="kpi-sub">categorías mapeadas</div></div>
+    <div class="kpi-card amber"><div class="kpi-label">Por completar</div><div class="kpi-val" id="p-pendientes">0</div><div class="kpi-sub" id="p-pend-sub">Todos documentados</div></div>
+  </div>
+  <div style="display:flex;justify-content:flex-end;margin-bottom:14px;">
+    <button class="btn-primary" onclick="openModalPerfil()">+ Agregar perfil</button>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:16px;" id="perfilesGrid"></div>
+</div>
+
+<!-- DESEMPEÑO -->
+<div class="page" id="tab-desempenio">
+  <div class="kpi-row" style="grid-template-columns:repeat(4,1fr);">
+    <div class="kpi-card amber"><div class="kpi-label">Evaluaciones realizadas</div><div class="kpi-val" id="ev-realizadas">0</div><div class="kpi-sub" id="ev-realizadas-sub">de 15 puestos</div></div>
+    <div class="kpi-card"><div class="kpi-label">Período</div><div class="kpi-val" style="font-size:20px">2026</div><div class="kpi-sub">Ronda 1 — Jul/Ago</div></div>
+    <div class="kpi-card"><div class="kpi-label">Promedio general</div><div class="kpi-val" id="ev-prom">—</div><div class="kpi-sub">escala 1–5</div></div>
+    <div class="kpi-card"><div class="kpi-label">Con plan de mejora</div><div class="kpi-val" id="ev-mejora">0</div><div class="kpi-sub">colaboradores</div></div>
+  </div>
+  <div class="card" style="padding:0;overflow:hidden;">
+    <table class="desempenio-table">
+      <thead><tr>
+        <th>Puesto</th><th>Área</th><th style="text-align:center">Puntaje</th>
+        <th>Competencias evaluadas</th><th>Estado</th><th>Observaciones</th><th style="width:80px">Acción</th>
+      </tr></thead>
+      <tbody id="desempenioTbody"></tbody>
+    </table>
+  </div>
+  <div class="card" style="margin-top:20px;">
+    <div class="card-title">Escala de desempeño</div>
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;font-size:12px;">
+      <div style="text-align:center;padding:10px;background:#E8F5E9;border-radius:7px;"><div class="score-circle score-5" style="margin:0 auto 6px">5</div><strong>Supera ampliamente</strong></div>
+      <div style="text-align:center;padding:10px;background:#F1F8E9;border-radius:7px;"><div class="score-circle score-4" style="margin:0 auto 6px">4</div><strong>Supera lo esperado</strong></div>
+      <div style="text-align:center;padding:10px;background:#FFF8E1;border-radius:7px;"><div class="score-circle score-3" style="margin:0 auto 6px">3</div><strong>Cumple lo esperado</strong></div>
+      <div style="text-align:center;padding:10px;background:#FBE9E7;border-radius:7px;"><div class="score-circle score-2" style="margin:0 auto 6px">2</div><strong>En desarrollo</strong></div>
+      <div style="text-align:center;padding:10px;background:#FFEBEE;border-radius:7px;"><div class="score-circle score-1" style="margin:0 auto 6px">1</div><strong>Crítico</strong></div>
+    </div>
+  </div>
+</div>
+
+<!-- KPIs -->
+<div class="page" id="tab-kpis">
+  <div class="section-title">Indicadores de RRHH — 2026</div>
+  <div class="grid3">
+    <div class="card" style="text-align:center;">
+      <div class="kpi-label">Plan anual de formación</div>
+      <div style="font-size:38px;font-weight:600;color:var(--navy)" id="kpi-ig06">—</div>
+      <div style="font-size:12px;color:var(--muted)">IG-06 · % capacitaciones realizadas</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px">Meta: ≥ 90%</div>
+      <div style="margin-top:12px;display:flex;"><div class="prog-bar-bg"><div class="prog-bar-fill amber" id="pb-ig06" style="width:0%"></div></div></div>
+    </div>
+    <div class="card" style="text-align:center;">
+      <div class="kpi-label">Eficacia de capacitaciones</div>
+      <div style="font-size:38px;font-weight:600;color:var(--navy)" id="kpi-ig07">—</div>
+      <div style="font-size:12px;color:var(--muted)">IG-07 · % capacitaciones eficaces</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px">Meta: ≥ 90% · Semestral</div>
+      <div style="margin-top:12px;display:flex;"><div class="prog-bar-bg"><div class="prog-bar-fill" id="pb-ig07" style="width:0%"></div></div></div>
+    </div>
+    <div class="card" style="text-align:center;">
+      <div class="kpi-label">Evaluaciones de desempeño</div>
+      <div style="font-size:38px;font-weight:600;color:var(--navy)" id="kpi-ig08">0%</div>
+      <div style="font-size:12px;color:var(--muted)">IG-08 · % evaluaciones realizadas</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px">Meta: 100% · Anual</div>
+      <div style="margin-top:12px;display:flex;"><div class="prog-bar-bg"><div class="prog-bar-fill red" id="pb-ig08" style="width:0%"></div></div></div>
+    </div>
+  </div>
+  <div class="grid2">
+    <div class="card">
+      <div class="card-title">Formación: planificadas vs realizadas</div>
+      <div class="chart-wrap" style="height:230px;"><canvas id="chartKpiForm"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Actividades por categoría</div>
+      <div class="chart-wrap" style="height:230px;"><canvas id="chartCategoria"></canvas></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Registro de eficacia de capacitaciones</div>
+    <table style="width:100%;border-collapse:collapse;font-size:12.5px;" id="eficaciaTable">
+      <thead><tr>
+        <th style="background:var(--navy);color:white;padding:8px 12px;text-align:left;font-weight:500">Capacitación</th>
+        <th style="background:var(--navy);color:white;padding:8px 12px;text-align:left;font-weight:500">Fecha</th>
+        <th style="background:var(--navy);color:white;padding:8px 12px;text-align:center;font-weight:500">Asistentes</th>
+        <th style="background:var(--navy);color:white;padding:8px 12px;text-align:left;font-weight:500">Eficacia</th>
+        <th style="background:var(--navy);color:white;padding:8px 12px;text-align:left;font-weight:500">Observaciones</th>
+        <th style="background:var(--navy);color:white;padding:8px 12px;text-align:center;font-weight:500;width:70px">Acción</th>
+      </tr></thead>
+      <tbody id="eficaciaTbody"><tr><td colspan="5" style="padding:16px;color:var(--muted);text-align:center">Sin registros de eficacia cargados aún.</td></tr></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- CARGA DE DATOS -->
+<div class="page" id="tab-carga">
+  <div class="grid3">
+    <div class="card" style="text-align:center;cursor:pointer" onclick="openModal('modalCapacitacion')">
+      <div style="font-size:36px;margin-bottom:12px">📋</div>
+      <div style="font-size:15px;font-weight:600;color:var(--navy);margin-bottom:6px">Registrar capacitación</div>
+      <div style="font-size:12.5px;color:var(--muted)">Marcá una actividad como realizada, registrá fecha, asistentes y observaciones</div>
+      <div style="margin-top:14px"><button class="btn-primary" style="width:100%">Abrir formulario</button></div>
+    </div>
+    <div class="card" style="text-align:center;cursor:pointer" onclick="openModal('modalDesempenio')">
+      <div style="font-size:36px;margin-bottom:12px">⭐</div>
+      <div style="font-size:15px;font-weight:600;color:var(--navy);margin-bottom:6px">Cargar evaluación de desempeño</div>
+      <div style="font-size:12.5px;color:var(--muted)">Registrá puntaje general y por competencias para un colaborador</div>
+      <div style="margin-top:14px"><button class="btn-primary" style="width:100%">Abrir formulario</button></div>
+    </div>
+    <div class="card" style="text-align:center;cursor:pointer" onclick="openModal('modalEficacia')">
+      <div style="font-size:36px;margin-bottom:12px">✅</div>
+      <div style="font-size:15px;font-weight:600;color:var(--navy);margin-bottom:6px">Registrar eficacia</div>
+      <div style="font-size:12.5px;color:var(--muted)">Registrá la eficacia de una capacitación ya realizada con observaciones</div>
+      <div style="margin-top:14px"><button class="btn-primary" style="width:100%">Abrir formulario</button></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Historial de cargas recientes</div>
+    <div id="historialCarga" style="font-size:13px;color:var(--muted);">Sin registros recientes.</div>
+  </div>
+</div>
+
+<!-- MODALES -->
+<div class="modal-overlay" id="modalCapacitacion">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modalCapacitacion')">✕</button>
+    <div class="modal-title">📋 Registrar capacitación realizada</div>
+    <div class="f-group"><label class="f-label">Actividad de formación</label><select class="f-select" id="cap-actividad"></select></div>
+    <div class="f-row">
+      <div class="f-group"><label class="f-label">Fecha de realización</label><input type="date" class="f-input" id="cap-fecha"></div>
+      <div class="f-group"><label class="f-label">Estado</label><select class="f-select" id="cap-estado"><option value="✔">✔ Realizada</option><option value="◆">◆ Planificada</option><option value="●">● A confirmar</option></select></div>
+    </div>
+    <div class="f-group"><label class="f-label">Asistentes (nombres separados por coma)</label><input type="text" class="f-input" id="cap-asistentes" placeholder="Ej: María García, Juan López"></div>
+    <div class="f-group"><label class="f-label">Cantidad de asistentes</label><input type="number" class="f-input" id="cap-cantidad" min="0" placeholder="0"></div>
+    <div class="f-group"><label class="f-label">Observaciones</label><textarea class="f-textarea" id="cap-obs" placeholder="Modalidad, duración, material utilizado, etc."></textarea></div>
+    <div class="form-actions">
+      <button class="btn-secondary" onclick="closeModal('modalCapacitacion')">Cancelar</button>
+      <button class="btn-primary" onclick="guardarCapacitacion()">Guardar en Sheets</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalDesempenio">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modalDesempenio')">✕</button>
+    <div class="modal-title">⭐ Cargar evaluación de desempeño</div>
+    <div class="f-row">
+      <div class="f-group"><label class="f-label">Puesto / Colaborador</label><select class="f-select" id="ev-puesto" onchange="buildCompEvalGrid()"></select></div>
+      <div class="f-group"><label class="f-label">Fecha de evaluación</label><input type="date" class="f-input" id="ev-fecha"></div>
+    </div>
+    <div class="f-group"><label class="f-label">Puntaje general (1 = Crítico · 5 = Supera ampliamente)</label><select class="f-select" id="ev-puntaje"><option value="">Seleccioná un puntaje</option><option value="5">5 — Supera ampliamente</option><option value="4">4 — Supera lo esperado</option><option value="3">3 — Cumple lo esperado</option><option value="2">2 — En desarrollo</option><option value="1">1 — Crítico</option></select></div>
+    <div class="f-group"><label class="f-label">Puntaje por competencias (opcional)</label><div class="comp-eval-grid" id="compEvalGrid"></div></div>
+    <div class="f-group"><label class="f-label">Estado</label><select class="f-select" id="ev-estado"><option value="Evaluado">Evaluado</option><option value="En proceso">En proceso</option><option value="Plan de mejora">Con plan de mejora</option></select></div>
+    <div class="f-group"><label class="f-label">Comentario / observaciones</label><textarea class="f-textarea" id="ev-comentario" placeholder="Fortalezas, áreas de mejora, acuerdos, etc."></textarea></div>
+    <div class="form-actions">
+      <button class="btn-secondary" onclick="closeModal('modalDesempenio')">Cancelar</button>
+      <button class="btn-primary" onclick="guardarDesempenio()">Guardar en Sheets</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalEficacia">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modalEficacia')">✕</button>
+    <div class="modal-title">✅ Registrar eficacia de capacitación</div>
+    <div class="f-group"><label class="f-label">Capacitación</label><select class="f-select" id="ef-actividad"></select></div>
+    <div class="f-row">
+      <div class="f-group"><label class="f-label">Fecha de evaluación de eficacia</label><input type="date" class="f-input" id="ef-fecha"></div>
+      <div class="f-group"><label class="f-label">Cantidad de asistentes evaluados</label><input type="number" class="f-input" id="ef-cantidad" min="0"></div>
+    </div>
+    <div class="f-group"><label class="f-label">Resultado de eficacia</label><select class="f-select" id="ef-resultado"><option value="Eficaz">Eficaz — cumplió el objetivo</option><option value="Parcialmente eficaz">Parcialmente eficaz</option><option value="No eficaz">No eficaz — requiere refuerzo</option></select></div>
+    <div class="f-group"><label class="f-label">Observaciones / evidencias de eficacia</label><textarea class="f-textarea" id="ef-obs" placeholder="Ej: Se aplicó evaluación escrita, 8 de 10 aprobaron."></textarea></div>
+    <div class="form-actions">
+      <button class="btn-secondary" onclick="closeModal('modalEficacia')">Cancelar</button>
+      <button class="btn-primary" onclick="guardarEficacia()">Guardar en Sheets</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalAlertas">
+  <div class="modal" style="width:min(680px,95vw)">
+    <button class="modal-close" onclick="closeModal('modalAlertas')">✕</button>
+    <div class="modal-title">✏️ Editar alertas y próximas acciones</div>
+    <div id="alertasEditorList" style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px;"></div>
+    <button class="btn-secondary" style="width:100%;margin-bottom:14px" onclick="agregarAlertaEditor()">+ Agregar alerta</button>
+    <div class="form-actions">
+      <button class="btn-secondary" onclick="closeModal('modalAlertas')">Cancelar</button>
+      <button class="btn-primary" onclick="guardarAlertas()">Guardar alertas</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalPerfil">
+  <div class="modal" style="width:min(640px,95vw)">
+    <button class="modal-close" onclick="closeModal('modalPerfil')">✕</button>
+    <div class="modal-title" id="modalPerfilTitulo">+ Agregar perfil</div>
+    <input type="hidden" id="perfil-edit-idx" value="">
+    <div class="f-row">
+      <div class="f-group"><label class="f-label">Puesto</label><input type="text" class="f-input" id="perfil-puesto" placeholder="Ej: Analista de Compras"></div>
+      <div class="f-group"><label class="f-label">Área</label><input type="text" class="f-input" id="perfil-area" placeholder="Ej: Compras"></div>
+    </div>
+    <div class="f-row">
+      <div class="f-group"><label class="f-label">Tipo</label><select class="f-select" id="perfil-tipo"><option value="Gerencia">Gerencia</option><option value="Jefatura">Jefatura</option><option value="Técnico">Técnico</option><option value="Administrativo">Administrativo</option><option value="Operativo">Operativo</option></select></div>
+      <div class="f-group"><label class="f-label">Formación mínima</label><select class="f-select" id="perfil-formacion"><option value="Secundario">Secundario</option><option value="Secundario completo">Secundario completo</option><option value="Terciario">Terciario</option><option value="Universitario">Universitario</option></select></div>
+    </div>
+    <div class="f-group"><label class="f-label">Experiencia mínima</label><select class="f-select" id="perfil-exp"><option value="Sin experiencia previa">Sin experiencia previa</option><option value="6 meses">6 meses</option><option value="1 año">1 año</option><option value="2 años">2 años</option><option value="3 años">3 años</option><option value="5 años">5 años</option></select></div>
+    <div class="f-group">
+      <label class="f-label" style="margin-bottom:10px">Competencias (nombre y nivel 1–4)</label>
+      <div id="perfilCompsEditor" style="display:flex;flex-direction:column;gap:8px;"></div>
+      <button class="btn-secondary" style="margin-top:8px;font-size:12px;padding:6px 12px" onclick="agregarCompPerfil()">+ Agregar competencia</button>
+    </div>
+    <div class="form-actions">
+      <button class="btn-secondary" onclick="closeModal('modalPerfil')">Cancelar</button>
+      <button class="btn-primary" onclick="guardarPerfil()">Guardar perfil</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalEditarFormacion">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modalEditarFormacion')">✕</button>
+    <div class="modal-title">✏️ Editar actividad de formación</div>
+    <input type="hidden" id="edit-form-id">
+    <div class="f-group"><label class="f-label">Tema / Actividad</label><input type="text" class="f-input" id="edit-form-tema"></div>
+    <div class="f-row">
+      <div class="f-group"><label class="f-label">Bloque</label><select class="f-select" id="edit-form-bloque"><option value="SGC">SGC / Calidad</option><option value="SYH">Seguridad e Higiene</option><option value="HAB">Habilidades</option></select></div>
+      <div class="f-group"><label class="f-label">Responsable</label><input type="text" class="f-input" id="edit-form-resp"></div>
+    </div>
+    <div class="f-group"><label class="f-label">Dirigido a</label><input type="text" class="f-input" id="edit-form-dirigido"></div>
+    <div class="f-group"><label class="f-label">Estados por mes</label><div style="display:grid;grid-template-columns:repeat(6,1fr);gap:8px;" id="edit-form-meses"></div></div>
+    <div class="form-actions">
+      <button class="btn-secondary" onclick="closeModal('modalEditarFormacion')">Cancelar</button>
+      <button class="btn-primary" onclick="guardarEdicionFormacion()">Guardar cambios</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalEditarEficacia">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modalEditarEficacia')">✕</button>
+    <div class="modal-title">✏️ Editar registro de eficacia</div>
+    <input type="hidden" id="edit-ef-idx">
+    <div class="f-group"><label class="f-label">Capacitación</label><input type="text" class="f-input" id="edit-ef-tema" readonly style="background:var(--gray)"></div>
+    <div class="f-row">
+      <div class="f-group"><label class="f-label">Fecha</label><input type="date" class="f-input" id="edit-ef-fecha"></div>
+      <div class="f-group"><label class="f-label">Asistentes evaluados</label><input type="number" class="f-input" id="edit-ef-cantidad" min="0"></div>
+    </div>
+    <div class="f-group"><label class="f-label">Resultado</label><select class="f-select" id="edit-ef-resultado"><option value="Eficaz">Eficaz — cumplió el objetivo</option><option value="Parcialmente eficaz">Parcialmente eficaz</option><option value="No eficaz">No eficaz — requiere refuerzo</option></select></div>
+    <div class="f-group"><label class="f-label">Observaciones</label><textarea class="f-textarea" id="edit-ef-obs"></textarea></div>
+    <div class="form-actions">
+      <button class="btn-secondary" onclick="closeModal('modalEditarEficacia')">Cancelar</button>
+      <button class="btn-primary" onclick="guardarEdicionEficacia()">Guardar cambios</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+const GS_URL = 'https://script.google.com/macros/s/AKfycbwGoB4uLwAB2pmuNHH15vR33BniBt18qYj2rWUw9mau6OZbnNijyDKzXf6nAEhuJ99j-w/exec';
+const MONTHS = ['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'];
+
+let ALERTAS = [
+  {titulo:'Control documental SGC', detalle:'Secretarias sin acceso al sistema. Capacitación pendiente — Abr/May.', tipo:'amber'},
+  {titulo:'Gestión del cambio', detalle:'Procedimiento de gestión del cambio pendiente. Capacitación — May.', tipo:'amber'},
+  {titulo:'ISO 9001 — completado', detalle:'Introducción (Feb), contexto/FODA/riesgos (Mar) — ✔ realizados.', tipo:'green'},
+  {titulo:'Evaluación de desempeño 2026', detalle:'Primera ronda sin iniciar. Planificar para Jul–Ago.', tipo:'blue'},
+];
+
+const ALERTA_STYLES = {
+  amber: {bg:'#FFF8E1', border:'#f4a228', titleColor:'#7a5200'},
+  green: {bg:'#E8F5E9', border:'#4caf50', titleColor:'#1b5e20'},
+  blue:  {bg:'#E3F2FD', border:'#2196f3', titleColor:'#0d47a1'},
+  red:   {bg:'#FFEBEE', border:'#e53935', titleColor:'#b71c1c'},
+};
+
+const FORMACION_LOCAL = [
+  {id:1,bloque:'SGC',tema:'Introducción a ISO 9001:2015',cat:'SGC',dirigido:'Todo el personal',meses:{2:'✔'},resp:'Resp. SGC'},
+  {id:2,bloque:'SGC',tema:'Contexto, Partes Interesadas y FODA',cat:'SGC',dirigido:'Todo el personal / Gerencia',meses:{3:'✔'},resp:'Resp. SGC'},
+  {id:3,bloque:'SGC',tema:'Riesgos y Oportunidades',cat:'SGC',dirigido:'Todo el personal / Gerencia',meses:{3:'✔'},resp:'Resp. SGC'},
+  {id:4,bloque:'SGC',tema:'Política de Calidad y Objetivos',cat:'SGC',dirigido:'Todo el personal',meses:{4:'◆'},resp:'Resp. SGC'},
+  {id:5,bloque:'SGC',tema:'Control Documental — Acceso al SGC',cat:'SGC',dirigido:'Secretaría / Admin',meses:{4:'◆'},resp:'Resp. SGC / RRHH'},
+  {id:6,bloque:'SGC',tema:'Procedimientos operativos del SGC',cat:'SGC',dirigido:'Responsables de proceso',meses:{5:'◆',6:'◆'},resp:'Resp. SGC'},
+  {id:7,bloque:'SGC',tema:'Gestión del Cambio',cat:'SGC',dirigido:'Gerencia + Responsables',meses:{5:'◆'},resp:'Resp. SGC'},
+  {id:8,bloque:'SGC',tema:'Auditoría Interna ISO 9001',cat:'SGC',dirigido:'Auditores internos',meses:{7:'◆'},resp:'Resp. SGC'},
+  {id:9,bloque:'SGC',tema:'Satisfacción del cliente y encuesta',cat:'SGC',dirigido:'Recepción / Secretaría',meses:{5:'◆'},resp:'Resp. SGC'},
+  {id:10,bloque:'SGC',tema:'Revisión por la Dirección',cat:'SGC',dirigido:'Gerencia + Responsables',meses:{10:'◆'},resp:'Resp. SGC'},
+  {id:11,bloque:'SYH',tema:'Inducción de Ingreso',cat:'SYH',dirigido:'Personal nuevo',meses:{1:'◆',2:'◆',3:'◆',4:'◆',5:'◆',6:'◆',7:'◆',8:'◆',9:'◆',10:'◆',11:'◆',12:'◆'},resp:'Resp. S&H'},
+  {id:12,bloque:'SYH',tema:'Ergonomía y pausas activas',cat:'SYH',dirigido:'Personal operativo',meses:{3:'◆'},resp:'Resp. S&H'},
+  {id:13,bloque:'SYH',tema:'Normas S&H — Ley 19587 / 24557',cat:'SYH',dirigido:'Todo el personal',meses:{4:'◆'},resp:'Resp. S&H'},
+  {id:14,bloque:'SYH',tema:'Evaluación de riesgos',cat:'SYH',dirigido:'Personal operativo / taller',meses:{5:'◆'},resp:'Resp. S&H'},
+  {id:15,bloque:'SYH',tema:'Protección contra incendios',cat:'SYH',dirigido:'Todo el personal',meses:{6:'◆'},resp:'Resp. S&H'},
+  {id:16,bloque:'SYH',tema:'Primeros auxilios — RCP / DEA',cat:'SYH',dirigido:'Todo el personal',meses:{7:'◆'},resp:'Resp. S&H / Médico'},
+  {id:17,bloque:'SYH',tema:'Gestión de residuos e incidentes ambientales',cat:'SYH',dirigido:'Todo el personal',meses:{8:'◆'},resp:'Resp. S&H'},
+  {id:18,bloque:'SYH',tema:'Riesgo eléctrico y ruido',cat:'SYH',dirigido:'Personal técnico / taller',meses:{9:'◆'},resp:'Resp. S&H'},
+  {id:19,bloque:'SYH',tema:'Exposición a agentes químicos',cat:'SYH',dirigido:'Personal de campo',meses:{10:'◆'},resp:'Resp. S&H'},
+  {id:20,bloque:'SYH',tema:'Consumo problemático',cat:'SYH',dirigido:'Todo el personal',meses:{11:'◆'},resp:'Resp. S&H / Médico'},
+  {id:21,bloque:'SYH',tema:'Síntomas de urgencia médica',cat:'SYH',dirigido:'Todo el personal',meses:{11:'◆'},resp:'Médico Laboral'},
+  {id:22,bloque:'SYH',tema:'Manipulación de equipos y herramientas',cat:'SYH',dirigido:'Personal técnico / taller',meses:{9:'◆'},resp:'Resp. S&H'},
+  {id:23,bloque:'SYH',tema:'Alimentación saludable en turnos',cat:'SYH',dirigido:'Todo el personal',meses:{10:'◆'},resp:'Médico Laboral'},
+  {id:24,bloque:'SYH',tema:'Roles de emergencia y simulacros',cat:'SYH',dirigido:'Todo el personal',meses:{4:'◆',8:'◆'},resp:'Resp. S&H'},
+  {id:25,bloque:'HAB',tema:'Comunicación efectiva y trabajo en equipo',cat:'HAB',dirigido:'Todo el personal',meses:{4:'◆'},resp:'Resp. RRHH'},
+  {id:26,bloque:'HAB',tema:'Liderazgo y delegación',cat:'HAB',dirigido:'Gerencia + Responsables',meses:{6:'◆'},resp:'Consultor'},
+  {id:27,bloque:'HAB',tema:'Planificación y control de gestión (KPIs)',cat:'HAB',dirigido:'Gerencia + Responsables',meses:{8:'◆'},resp:'Consultor'},
+  {id:28,bloque:'HAB',tema:'Herramientas informáticas — Excel / sistemas',cat:'HAB',dirigido:'Administrativos / Secretaría',meses:{5:'◆',6:'◆'},resp:'Externo'},
+  {id:29,bloque:'HAB',tema:'Gestión del riesgo y toma de decisiones',cat:'HAB',dirigido:'Gerencia + Responsables',meses:{9:'◆'},resp:'Resp. SGC'},
+  {id:30,bloque:'HAB',tema:'Atención al cliente y satisfacción',cat:'HAB',dirigido:'Recepción / Secretaría',meses:{5:'◆'},resp:'Resp. SGC / RRHH'},
+  {id:31,bloque:'HAB',tema:'Orden y limpieza — 5S en recepción',cat:'HAB',dirigido:'Secretaría / Recepción',meses:{4:'●'},resp:'RRHH / S&H'},
+];
+
+// ── ORGANIGRAMA Rev.02 — solo internos ──
+const PUESTOS = [
+  'Gerente General',
+  'Responsable de Finanzas',
+  'Gerente de Operaciones',
+  'Técnico de S&H',
+  'Responsable de Taller',
+  'Responsable Área Técnica',
+  'Supervisor de Operaciones',
+  'Analista de RRHH',
+  'Encargado Cuadrilla Obras Civiles',
+  'Ayudante Obras Civiles',
+  'Encargado de Cuadrilla',
+  'Ayudante',
+  'Asistente Control Documental',
+  'Analista de Compras',
+  'Analista de Finanzas',
+];
+
+const COMPETENCIAS_BASE = [
+  'Responsabilidad','Compromiso','Proactividad','Liderazgo',
+  'Comunicación efectiva','Resolución de problemas','Trabajo en equipo',
+  'Adaptabilidad','Conocimientos técnicos',
+  // SGC por jerarquía — se agregan dinámicamente en evaluación
+  'Conocimiento del SGC','Cumplimiento de procedimientos',
+  'Gestión documental','Mejora continua'
+];
+
+// Competencias SGC por nivel jerárquico (cl. 7.3 ISO 9001)
+const COMPS_SGC = {
+  Gerencia: {
+    'Liderazgo del SGC': 4,
+    'Definición de política y objetivos': 4,
+    'Revisión por la dirección': 4,
+    'Compromiso con mejora continua': 4,
+  },
+  Jefatura: {
+    'Conocimiento del SGC': 3,
+    'Gestión de riesgos y oportunidades': 3,
+    'Control de procedimientos del área': 3,
+    'Mejora continua': 3,
+  },
+  Técnico: {
+    'Conocimiento del SGC': 3,
+    'Cumplimiento de procedimientos': 3,
+    'Control documental básico': 2,
+    'Reporte de no conformidades': 2,
+  },
+  Administrativo: {
+    'Conocimiento del SGC': 3,
+    'Cumplimiento de procedimientos': 3,
+    'Control documental básico': 3,
+    'Gestión de registros': 3,
+  },
+  Operativo: {
+    'Conocimiento del SGC': 2,
+    'Cumplimiento de procedimientos': 3,
+    'Reporte de no conformidades': 2,
+  },
+};
+
+// ── PERFILES_DATA — Organigrama Rev.02, 15 puestos internos ──
+const PERFILES_DATA = [
+  {puesto:'Gerente General', area:'Gerencia', tipo:'Gerencia', formacion:'Universitario', exp:'5 años',
+    comps:{Responsabilidad:4,Compromiso:4,'Visión estratégica':4,'Toma de decisiones':4,Liderazgo:4,Proactividad:4,
+      ...COMPS_SGC.Gerencia}},
+  {puesto:'Responsable de Finanzas', area:'Finanzas', tipo:'Jefatura', formacion:'Universitario', exp:'3 años',
+    comps:{Responsabilidad:4,Compromiso:3,'Pens. analítico':4,'Conocim. técnicos':4,'Tools TIC':3,Proactividad:3,
+      ...COMPS_SGC.Jefatura}},
+  {puesto:'Gerente de Operaciones', area:'Operaciones', tipo:'Gerencia', formacion:'Universitario', exp:'5 años',
+    comps:{Responsabilidad:4,Liderazgo:4,'Plan. y control':4,'Toma de decisiones':4,Proactividad:4,'Comunicación efectiva':3,
+      ...COMPS_SGC.Gerencia}},
+  {puesto:'Técnico de S&H', area:'S&H', tipo:'Técnico', formacion:'Terciario', exp:'1 año',
+    comps:{Profesionalismo:3,'Conocim. técnicos':3,Responsabilidad:3,Compromiso:2,Adaptabilidad:2,Proactividad:2,
+      ...COMPS_SGC.Técnico}},
+  {puesto:'Responsable de Taller', area:'Taller', tipo:'Jefatura', formacion:'Secundario completo', exp:'1 año',
+    comps:{'Cap. respuesta':3,Proactividad:3,Profesionalismo:3,Responsabilidad:3,Compromiso:2,Adaptabilidad:2,
+      ...COMPS_SGC.Jefatura}},
+  {puesto:'Responsable Área Técnica', area:'Técnica', tipo:'Jefatura', formacion:'Terciario', exp:'3 años',
+    comps:{Profesionalismo:3,Liderazgo:3,'Plan. y control':3,'Conocim. técnicos':4,Proactividad:3,Negociación:3,
+      ...COMPS_SGC.Jefatura}},
+  {puesto:'Supervisor de Operaciones', area:'Operaciones', tipo:'Jefatura', formacion:'Secundario completo', exp:'1 año',
+    comps:{Liderazgo:3,Responsabilidad:3,'Plan. y control':3,Proactividad:3,'Trabajo en equipo':3,Compromiso:3,
+      ...COMPS_SGC.Jefatura}},
+  {puesto:'Analista de RRHH', area:'RRHH', tipo:'Administrativo', formacion:'Terciario', exp:'1 año',
+    comps:{Profesionalismo:3,Responsabilidad:3,Proactividad:3,'Tools TIC':3,'Comunicación efectiva':3,Compromiso:3,
+      ...COMPS_SGC.Administrativo}},
+  {puesto:'Encargado Cuadrilla Obras Civiles', area:'Obras Civiles', tipo:'Jefatura', formacion:'Secundario completo', exp:'1 año',
+    comps:{Liderazgo:3,Responsabilidad:3,'Conocim. técnicos':3,Proactividad:2,Compromiso:3,'Trabajo en equipo':3,
+      ...COMPS_SGC.Jefatura}},
+  {puesto:'Ayudante Obras Civiles', area:'Obras Civiles', tipo:'Operativo', formacion:'Secundario incompleto', exp:'1 año',
+    comps:{Responsabilidad:3,Compromiso:3,'Trabajo en equipo':3,Adaptabilidad:2,Proactividad:2,
+      ...COMPS_SGC.Operativo}},
+  {puesto:'Encargado de Cuadrilla', area:'Operaciones', tipo:'Jefatura', formacion:'Secundario completo', exp:'1 año',
+    comps:{Liderazgo:3,Responsabilidad:3,'Conocim. técnicos':3,Proactividad:2,Compromiso:3,'Trabajo en equipo':3,
+      ...COMPS_SGC.Jefatura}},
+  {puesto:'Ayudante', area:'Operaciones', tipo:'Operativo', formacion:'Secundario incompleto', exp:'1 año',
+    comps:{Responsabilidad:3,Compromiso:3,'Trabajo en equipo':3,Adaptabilidad:2,Proactividad:2,
+      ...COMPS_SGC.Operativo}},
+  {puesto:'Asistente Control Documental', area:'RRHH / Admin', tipo:'Administrativo', formacion:'Secundario completo', exp:'1 año',
+    comps:{Responsabilidad:3,Compromiso:3,'Tools TIC':3,Proactividad:2,'Gestión de registros':3,'Comunicación efectiva':2,
+      ...COMPS_SGC.Administrativo}},
+  {puesto:'Analista de Compras', area:'Compras', tipo:'Administrativo', formacion:'Terciario', exp:'1 año',
+    comps:{Profesionalismo:3,'Pens. analítico':3,Negociación:3,'Conocim. técnicos':3,Proactividad:3,Responsabilidad:3,
+      ...COMPS_SGC.Administrativo}},
+  {puesto:'Analista de Finanzas', area:'Finanzas', tipo:'Administrativo', formacion:'Terciario', exp:'1 año',
+    comps:{Responsabilidad:3,'Pens. analítico':3,'Tools TIC':3,'Conocim. técnicos':3,Compromiso:3,Proactividad:2,
+      ...COMPS_SGC.Administrativo}},
+];
+
+// ── SIN LOCALSTORAGE — perfiles extras se sincronizan vía Sheets ──
+function savePerfilesToStorage() { /* migrado a Sheets */ }
+function loadPerfilesFromStorage() { /* migrado a Sheets */ }
+
+let FORMACION = [...FORMACION_LOCAL];
+let DESEMPENIO = PUESTOS.map(p => {
+  const perfil = PERFILES_DATA.find(d => d.puesto === p);
+  return {puesto: p, area: perfil ? perfil.area : '', puntaje: null, competencias: '', estado: 'Sin evaluar', obs: ''};
+});
+let EFICACIA = [];
+let historial = [];
+
+function showTab(id, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  if (btn) btn.classList.add('active');
+}
+
+function showToast(msg, isError) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (isError ? ' error' : '');
+  setTimeout(() => t.className = 'toast', 3000);
+}
+
+function openModal(id) {
+  document.getElementById(id).classList.add('open');
+  if (id === 'modalCapacitacion' || id === 'modalEficacia') populateActividadSelect(id);
+  if (id === 'modalDesempenio') { populatePuestoSelect(); buildCompEvalGrid(); }
+}
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+function populateActividadSelect(modalId) {
+  const selId = modalId === 'modalCapacitacion' ? 'cap-actividad' : 'ef-actividad';
+  const sel = document.getElementById(selId);
+  sel.innerHTML = FORMACION.map(f => `<option value="${f.id}">${f.id}. ${f.tema}</option>`).join('');
+}
+function populatePuestoSelect() {
+  const sel = document.getElementById('ev-puesto');
+  sel.innerHTML = PUESTOS.map(p => `<option value="${p}">${p}</option>`).join('');
+}
+function buildCompEvalGrid() {
+  const grid = document.getElementById('compEvalGrid');
+  const puestoSel = document.getElementById('ev-puesto').value;
+  const perfil = PERFILES_DATA.find(p => p.puesto === puestoSel);
+  // Competencias base + SGC del perfil
+  const compsDelPerfil = perfil ? Object.keys(perfil.comps) : COMPETENCIAS_BASE;
+  const todasComps = [...new Set([...COMPETENCIAS_BASE.slice(0,9), ...compsDelPerfil])];
+  grid.innerHTML = todasComps.map(c => `
+    <div class="comp-eval-item">
+      <label>${c}</label>
+      <select class="comp-score-select" data-comp="${c}">
+        <option value="">—</option>
+        <option value="5">5</option><option value="4">4</option>
+        <option value="3">3</option><option value="2">2</option><option value="1">1</option>
+      </select>
+    </div>`).join('');
+}
+
+// Al cambiar puesto en modal desempeño, reconstruir grilla
+function onPuestoDesempenioChange() {
+  buildCompEvalGrid();
+}
+
+async function postToSheets(action, payload) {
+  const body = JSON.stringify({action, ...payload});
+  const res = await fetch(GS_URL, {method:'POST', body, headers:{'Content-Type':'text/plain'}});
+  return res.json();
+}
+
+async function guardarCapacitacion() {
+  const id = parseInt(document.getElementById('cap-actividad').value);
+  const fecha = document.getElementById('cap-fecha').value;
+  const estado = document.getElementById('cap-estado').value;
+  const asistentes = document.getElementById('cap-asistentes').value;
+  const cantidad = document.getElementById('cap-cantidad').value;
+  const obs = document.getElementById('cap-obs').value;
+  if (!fecha) { showToast('Completá la fecha', true); return; }
+  const item = FORMACION.find(f => f.id === id);
+  if (!item) return;
+  const mes = new Date(fecha + 'T12:00:00').getMonth() + 1;
+  item.meses[mes] = estado;
+  addHistorial('capacitacion', `${item.tema} — ${estado} (${fecha})`);
+  try {
+    await postToSheets('updateFormacion', {id, mes, estado, fecha, asistentes, cantidad, obs});
+    showToast('✔ Capacitación guardada en Sheets');
+  } catch(e) {
+    showToast('Guardado localmente. Sincronizá para subir a Sheets.', true);
+  }
+  closeModal('modalCapacitacion');
+  renderFormacion(); updateKpis();
+}
+
+async function guardarDesempenio() {
+  const puesto = document.getElementById('ev-puesto').value;
+  const fecha = document.getElementById('ev-fecha').value;
+  const puntaje = document.getElementById('ev-puntaje').value;
+  const estado = document.getElementById('ev-estado').value;
+  const comentario = document.getElementById('ev-comentario').value;
+  if (!puntaje) { showToast('Seleccioná un puntaje', true); return; }
+  const compScores = {};
+  document.querySelectorAll('#compEvalGrid .comp-score-select').forEach(s => {
+    if (s.value) compScores[s.dataset.comp] = s.value;
+  });
+  const compStr = Object.entries(compScores).map(([k,v]) => `${k}:${v}`).join(', ');
+  const idx = DESEMPENIO.findIndex(d => d.puesto === puesto);
+  if (idx >= 0) {
+    DESEMPENIO[idx].puntaje = parseInt(puntaje);
+    DESEMPENIO[idx].estado = estado;
+    DESEMPENIO[idx].obs = comentario;
+    DESEMPENIO[idx].competencias = compStr;
+  }
+  addHistorial('desempenio', `${puesto} — Puntaje ${puntaje} (${fecha || 'sin fecha'})`);
+  try {
+    await postToSheets('updateDesempenio', {puesto, fecha, puntaje, estado, competencias:compStr, obs:comentario});
+    showToast('✔ Evaluación guardada en Sheets');
+  } catch(e) { showToast('Guardado localmente.', true); }
+  closeModal('modalDesempenio');
+  renderDesempenio(); updateKpis();
+}
+
+async function guardarEficacia() {
+  const id = parseInt(document.getElementById('ef-actividad').value);
+  const fecha = document.getElementById('ef-fecha').value;
+  const cantidad = document.getElementById('ef-cantidad').value;
+  const resultado = document.getElementById('ef-resultado').value;
+  const obs = document.getElementById('ef-obs').value;
+  const item = FORMACION.find(f => f.id === id);
+  if (!item) return;
+  EFICACIA.push({tema:item.tema, fecha, cantidad, resultado, obs});
+  addHistorial('eficacia', `${item.tema} — ${resultado} (${fecha || 'sin fecha'})`);
+  try {
+    await postToSheets('addEficacia', {id, tema:item.tema, fecha, cantidad, resultado, obs});
+    showToast('✔ Eficacia guardada en Sheets');
+  } catch(e) { showToast('Guardado localmente.', true); }
+  closeModal('modalEficacia');
+  renderEficaciaTable();
+}
+
+function addHistorial(tipo, desc) {
+  const icons = {capacitacion:'📋', desempenio:'⭐', eficacia:'✅'};
+  historial.unshift({tipo, desc, ts: new Date().toLocaleString('es-AR')});
+  if (historial.length > 20) historial.pop();
+  const div = document.getElementById('historialCarga');
+  div.innerHTML = historial.map(h =>
+    `<div style="padding:9px 0;border-bottom:1px solid var(--border);font-size:12.5px;">
+      <span style="margin-right:8px">${icons[h.tipo]}</span>
+      <strong>${h.desc}</strong>
+      <span style="color:var(--muted);margin-left:8px;font-size:11.5px">${h.ts}</span>
+    </div>`).join('');
+}
+
+function renderFormacion() {
+  const filtBloque = document.getElementById('filtroBloque').value;
+  const filtEstado = document.getElementById('filtroEstado').value;
+  const filtMes = document.getElementById('filtroMes').value;
+  const tbody = document.getElementById('formTbody');
+  tbody.innerHTML = '';
+  const catBadge = {SGC:'badge-sgc',SYH:'badge-syh',HAB:'badge-hab'};
+  const catLabel = {SGC:'SGC',SYH:'S&H',HAB:'HAB'};
+  const bloques = [{key:'SGC',label:'Bloque 1 — SGC / Calidad ISO 9001'},{key:'SYH',label:'Bloque 2 — Seguridad e Higiene'},{key:'HAB',label:'Bloque 3 — Habilidades y Competencias'}];
+  let total=0, real=0, plan=0, conf=0;
+  FORMACION.forEach(d => {
+    Object.values(d.meses).forEach(v => {
+      if(v==='✔') real++; else if(v==='◆') plan++; else if(v==='●') conf++;
+      total++;
+    });
+  });
+  document.getElementById('f-realizadas').textContent = real;
+  document.getElementById('f-planificadas').textContent = plan;
+  document.getElementById('f-confirmar').textContent = conf;
+  document.getElementById('f-total').textContent = FORMACION.length;
+  bloques.forEach(bl => {
+    if (filtBloque && filtBloque !== bl.key) return;
+    let rows = FORMACION.filter(d => d.bloque === bl.key);
+    if (filtEstado) rows = rows.filter(d => Object.values(d.meses).includes(filtEstado));
+    if (filtMes) rows = rows.filter(d => d.meses[parseInt(filtMes)]);
+    if (!rows.length) return;
+    const hRow = document.createElement('tr');
+    hRow.className = 'bloque-header';
+    hRow.innerHTML = `<td colspan="18">${bl.label}</td>`;
+    tbody.appendChild(hRow);
+    rows.forEach(d => {
+      const tr = document.createElement('tr');
+      let mesCells = '';
+      for (let m=1; m<=12; m++) {
+        const v = d.meses[m] || '';
+        let cls = v==='✔'?'mark-ok':v==='◆'?'mark-plan':v==='●'?'mark-pend':'';
+        mesCells += `<td class="month-cell"><span class="${cls}">${v}</span></td>`;
+      }
+      tr.innerHTML = `
+        <td style="text-align:center;font-weight:600;color:var(--muted)">${d.id}</td>
+        <td style="line-height:1.4">${d.tema}</td>
+        <td><span class="badge ${catBadge[d.bloque]}">${catLabel[d.bloque]}</span></td>
+        <td style="font-size:11.5px;color:var(--muted)">${d.dirigido}</td>
+        ${mesCells}
+        <td style="font-size:11.5px;color:var(--muted)">${d.resp}</td>
+        <td style="white-space:nowrap"><button class="btn-sm btn-cargar" onclick="openModalForCap(${d.id})">Cargar</button> <button class="btn-sm" style="background:#f0e6ff;color:#6a1b9a" onclick="editarFormacion(${d.id})">✏️</button></td>`;
+      tbody.appendChild(tr);
+    });
+  });
+}
+
+function openModalForCap(id) {
+  openModal('modalCapacitacion');
+  document.getElementById('cap-actividad').value = id;
+}
+
+function renderPerfiles() {
+  const grid = document.getElementById('perfilesGrid');
+  grid.innerHTML = '';
+  PERFILES_DATA.forEach((p,idx) => {
+    const initials = p.puesto.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+    let compsHtml = Object.entries(p.comps).map(([k,v]) => {
+      let dots=''; for(let i=1;i<=4;i++) dots+=`<div class="comp-dot ${i<=v?'filled':'empty'}"></div>`;
+      return `<div class="comp-item"><div class="comp-dots">${dots}</div><span style="font-size:11px;color:var(--muted)">${k}</span></div>`;
+    }).join('');
+    grid.innerHTML += `
+      <div class="perfil-card">
+        <div class="perfil-head">
+          <div class="perfil-avatar">${initials}</div>
+          <div style="flex:1"><div class="perfil-puesto">${p.puesto}</div><div class="perfil-area">${p.area} · ${p.tipo}</div></div>
+          <button class="btn-sm" style="background:rgba(255,255,255,0.15);color:white;margin-left:auto" onclick="openModalPerfil(${idx})">✏️</button>
+        </div>
+        <div class="perfil-body">
+          <div class="perfil-row"><span class="perfil-key">Formación mín.</span><span class="perfil-val">${p.formacion}</span></div>
+          <div class="perfil-row"><span class="perfil-key">Exp. mínima</span><span class="perfil-val">${p.exp}</span></div>
+          <div style="margin-top:10px;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Competencias</div>
+          <div class="comp-grid">${compsHtml}</div>
+        </div>
+      </div>`;
+  });
+}
+
+function renderDesempenio() {
+  const tbody = document.getElementById('desempenioTbody');
+  tbody.innerHTML = '';
+  let evaluados=0, sumPuntaje=0, conMejora=0;
+  DESEMPENIO.forEach(d => {
+    if (d.puntaje) { evaluados++; sumPuntaje+=d.puntaje; if(d.estado==='Plan de mejora') conMejora++; }
+    const scoreHtml = d.puntaje
+      ? `<div class="score-circle score-${d.puntaje}" style="margin:auto">${d.puntaje}</div>`
+      : `<div class="score-circle score-nd" style="margin:auto">—</div>`;
+    const estadoBadge = d.estado==='Sin evaluar'?'badge-pend':d.estado==='Evaluado'?'badge-ok':'badge-plan';
+    tbody.innerHTML += `<tr>
+      <td><strong style="color:var(--navy)">${d.puesto}</strong></td>
+      <td style="color:var(--muted);font-size:12px">${d.area||'—'}</td>
+      <td style="text-align:center">${scoreHtml}</td>
+      <td style="font-size:12px;color:var(--muted)">${d.competencias||'—'}</td>
+      <td><span class="badge ${estadoBadge}">${d.estado}</span></td>
+      <td style="font-size:12px;color:var(--muted)">${d.obs||'—'}</td>
+      <td style="white-space:nowrap"><button class="btn-sm btn-eval" onclick="openModalForEval('${d.puesto}')">Evaluar</button>${d.puntaje ? ` <button class="btn-sm" style="background:#f0e6ff;color:#6a1b9a" onclick="editarDesempenio('${d.puesto}')">✏️</button>` : ''}</td>
+    </tr>`;
+  });
+  document.getElementById('ev-realizadas').textContent = evaluados;
+  document.getElementById('ev-prom').textContent = evaluados ? (sumPuntaje/evaluados).toFixed(1) : '—';
+  document.getElementById('ev-mejora').textContent = conMejora;
+}
+
+function openModalForEval(puesto) {
+  openModal('modalDesempenio');
+  document.getElementById('ev-puesto').value = puesto;
+}
+
+function renderEficaciaTable() {
+  const tbody = document.getElementById('eficaciaTbody');
+  if (!EFICACIA.length) { tbody.innerHTML = '<tr><td colspan="5" style="padding:16px;color:var(--muted);text-align:center">Sin registros aún.</td></tr>'; return; }
+  tbody.innerHTML = EFICACIA.map((e,i) => `<tr>
+    <td style="padding:9px 12px;border-bottom:1px solid var(--border)">${e.tema}</td>
+    <td style="padding:9px 12px;border-bottom:1px solid var(--border)">${e.fecha||'—'}</td>
+    <td style="padding:9px 12px;border-bottom:1px solid var(--border);text-align:center">${e.cantidad||'—'}</td>
+    <td style="padding:9px 12px;border-bottom:1px solid var(--border)"><span class="badge ${e.resultado==='Eficaz'?'badge-ok':e.resultado==='No eficaz'?'badge-pend':'badge-plan'}">${e.resultado}</span></td>
+    <td style="padding:9px 12px;border-bottom:1px solid var(--border);font-size:12px;color:var(--muted)">${e.obs||'—'}</td>
+    <td style="padding:9px 12px;border-bottom:1px solid var(--border);text-align:center"><button class="btn-sm" style="background:#f0e6ff;color:#6a1b9a" onclick="editarEficacia(${i})">✏️</button> <button class="btn-sm" style="background:#ffebee;color:#c00000" onclick="eliminarEficacia(${i})">✕</button></td>
+  </tr>`).join('');
+}
+
+function updateKpis() {
+  const real = FORMACION.reduce((a,f) => a + Object.values(f.meses).filter(v=>v==='✔').length, 0);
+  const total = FORMACION.length;
+  const pct = Math.round(real/total*100);
+  document.getElementById('r-form-pct').textContent = pct+'%';
+  document.getElementById('r-form-sub').textContent = `${real} de ${total} actividades`;
+  document.getElementById('r-form-pend').textContent = total - real;
+  document.getElementById('kpi-ig06').textContent = pct+'%';
+  document.getElementById('pb-ig06').style.width = pct+'%';
+  const evalDone = DESEMPENIO.filter(d=>d.puntaje).length;
+  const evalPct = Math.round(evalDone/DESEMPENIO.length*100);
+  document.getElementById('r-eval-pct').textContent = evalPct+'%';
+  document.getElementById('r-eval-sub').textContent = `${evalDone} de ${DESEMPENIO.length}`;
+  document.getElementById('kpi-ig08').textContent = evalPct+'%';
+  document.getElementById('pb-ig08').style.width = evalPct+'%';
+  const efReal = EFICACIA.filter(e=>e.resultado==='Eficaz').length;
+  if (EFICACIA.length) {
+    const efPct = Math.round(efReal/EFICACIA.length*100);
+    document.getElementById('kpi-ig07').textContent = efPct+'%';
+    document.getElementById('pb-ig07').style.width = efPct+'%';
+  }
+  updateResumenBloques();
+}
+
+function updateResumenBloques() {
+  const bloques = [{key:'SGC',label:'SGC / ISO 9001 (10 actividades)'},{key:'SYH',label:'Seguridad e Higiene (14 actividades)'},{key:'HAB',label:'Habilidades y competencias (7 actividades)'}];
+  const colors = ['green','amber',''];
+  const div = document.getElementById('resumen-bloques');
+  div.innerHTML = bloques.map((bl,i) => {
+    const items = FORMACION.filter(f=>f.bloque===bl.key);
+    const real = items.reduce((a,f)=>a+Object.values(f.meses).filter(v=>v==='✔').length,0);
+    const total = items.length;
+    const pct = Math.round(real/total*100);
+    return `<div>
+      <div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:6px"><span>${bl.label}</span><span>${pct}%</span></div>
+      <div class="prog-bar-bg"><div class="prog-bar-fill ${colors[i]}" style="width:${pct}%"></div></div>
+    </div>`;
+  }).join('');
+}
+
+// ── PERFILES ──
+function updatePerfilKpis() {
+  const total = PUESTOS.length;
+  const docs = PERFILES_DATA.length;
+  document.getElementById('p-documentados').textContent = docs;
+  document.getElementById('p-doc-sub').textContent = `de ${total} puestos`;
+  const rDoc = document.getElementById('r-perfiles-doc');
+  if (rDoc) rDoc.textContent = docs;
+  const rSub = document.getElementById('r-perfiles-sub');
+  if (rSub) rSub.textContent = `de ${total} puestos`;
+  const rTotal = document.getElementById('r-puestos-total');
+  if (rTotal) rTotal.textContent = total;
+  const totalComps = PERFILES_DATA.reduce((a,p) => a + Object.keys(p.comps).length, 0);
+  document.getElementById('p-competencias').textContent = totalComps;
+  const pendientes = PUESTOS.filter(p => !PERFILES_DATA.find(d => d.puesto === p));
+  document.getElementById('p-pendientes').textContent = pendientes.length;
+  document.getElementById('p-pend-sub').textContent = pendientes.length ? pendientes[0] : 'Todos documentados';
+  // desempeño sub
+  const evSub = document.getElementById('ev-realizadas-sub');
+  if (evSub) evSub.textContent = `de ${DESEMPENIO.length} puestos`;
+}
+
+function agregarCompPerfil() {
+  const grid = document.getElementById('perfilCompsEditor');
+  const idx = grid.children.length;
+  const div = document.createElement('div');
+  div.style.cssText = 'display:flex;gap:8px;align-items:center;';
+  div.innerHTML = `
+    <input type="text" class="f-input" placeholder="Competencia" style="flex:1" id="pcomp-nombre-${idx}">
+    <select class="f-select" style="width:80px" id="pcomp-nivel-${idx}">
+      <option value="1">1</option><option value="2">2</option>
+      <option value="3" selected>3</option><option value="4">4</option>
+    </select>
+    <button class="btn-sm" style="background:#ffebee;color:#c00000;padding:5px 8px" onclick="this.parentElement.remove()">✕</button>`;
+  grid.appendChild(div);
+}
+
+function openModalPerfil(editIdx) {
+  const isEdit = editIdx !== undefined && editIdx !== null && editIdx !== '';
+  document.getElementById('modalPerfilTitulo').textContent = isEdit ? '✏️ Editar perfil' : '+ Agregar perfil';
+  document.getElementById('perfil-edit-idx').value = isEdit ? editIdx : '';
+  const grid = document.getElementById('perfilCompsEditor');
+  grid.innerHTML = '';
+  if (isEdit) {
+    const p = PERFILES_DATA[editIdx];
+    document.getElementById('perfil-puesto').value = p.puesto;
+    document.getElementById('perfil-area').value = p.area;
+    document.getElementById('perfil-tipo').value = p.tipo;
+    document.getElementById('perfil-formacion').value = p.formacion;
+    document.getElementById('perfil-exp').value = p.exp;
+    Object.entries(p.comps).forEach(([k,v], i) => {
+      const div = document.createElement('div');
+      div.style.cssText = 'display:flex;gap:8px;align-items:center;';
+      div.innerHTML = `<input type="text" class="f-input" value="${k}" style="flex:1" id="pcomp-nombre-${i}">
+        <select class="f-select" style="width:80px" id="pcomp-nivel-${i}">
+          ${[1,2,3,4].map(n=>`<option value="${n}" ${n===v?'selected':''}>${n}</option>`).join('')}
+        </select>
+        <button class="btn-sm" style="background:#ffebee;color:#c00000;padding:5px 8px" onclick="this.parentElement.remove()">✕</button>`;
+      grid.appendChild(div);
+    });
+  } else {
+    document.getElementById('perfil-puesto').value = '';
+    document.getElementById('perfil-area').value = '';
+    document.getElementById('perfil-tipo').value = 'Jefatura';
+    document.getElementById('perfil-formacion').value = 'Secundario completo';
+    document.getElementById('perfil-exp').value = '1 año';
+    for (let i=0; i<3; i++) agregarCompPerfil();
+  }
+  openModal('modalPerfil');
+}
+
+async function guardarPerfil() {
+  const puesto = document.getElementById('perfil-puesto').value.trim();
+  const area = document.getElementById('perfil-area').value.trim();
+  if (!puesto || !area) { showToast('Completá puesto y área', true); return; }
+  const tipo = document.getElementById('perfil-tipo').value;
+  const formacion = document.getElementById('perfil-formacion').value;
+  const exp = document.getElementById('perfil-exp').value;
+  const comps = {};
+  document.getElementById('perfilCompsEditor').querySelectorAll('div').forEach((row, i) => {
+    const nombre = document.getElementById(`pcomp-nombre-${i}`)?.value.trim();
+    const nivel = parseInt(document.getElementById(`pcomp-nivel-${i}`)?.value);
+    if (nombre) comps[nombre] = nivel;
+  });
+  const perfil = {puesto, area, tipo, formacion, exp, comps};
+  const editIdx = document.getElementById('perfil-edit-idx').value;
+  if (editIdx !== '') {
+    PERFILES_DATA[parseInt(editIdx)] = perfil;
+  } else {
+    PERFILES_DATA.push(perfil);
+    if (!PUESTOS.includes(puesto)) PUESTOS.push(puesto);
+  }
+  // ── GUARDAR EN LOCALSTORAGE ──
+  savePerfilesToStorage();
+  renderPerfiles();
+  updatePerfilKpis();
+  closeModal('modalPerfil');
+  try {
+    await postToSheets('updatePerfil', {perfil: JSON.stringify(perfil), idx: editIdx});
+    showToast('✔ Perfil guardado en Sheets');
+  } catch(e) {
+    showToast('Perfil guardado localmente', false);
+  }
+}
+
+// ── ALERTAS ──
+function renderAlertas() {
+  const div = document.getElementById('alertas');
+  if (!ALERTAS.length) { div.innerHTML = '<span style="color:var(--muted);font-size:13px">Sin alertas activas.</span>'; return; }
+  div.innerHTML = ALERTAS.map((a,i) => {
+    const s = ALERTA_STYLES[a.tipo] || ALERTA_STYLES.amber;
+    return `<div style="background:${s.bg};border-left:3px solid ${s.border};padding:10px 14px;border-radius:0 6px 6px 0;">
+      <strong style="color:${s.titleColor};">${a.titulo}</strong>
+      <br><span style="color:var(--muted);font-size:12px;">${a.detalle}</span>
+    </div>`;
+  }).join('');
+}
+
+function openModalAlertas() {
+  const list = document.getElementById('alertasEditorList');
+  list.innerHTML = ALERTAS.map((a,i) => `
+    <div style="background:var(--gray);border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:8px;">
+      <div class="f-row">
+        <div class="f-group" style="margin-bottom:0"><label class="f-label">Título</label><input type="text" class="f-input" id="ae-titulo-${i}" value="${a.titulo.replace(/"/g,'&quot;')}"></div>
+        <div class="f-group" style="margin-bottom:0"><label class="f-label">Tipo</label><select class="f-select" id="ae-tipo-${i}">
+          <option value="amber" ${a.tipo==='amber'?'selected':''}>⚠️ Advertencia</option>
+          <option value="green" ${a.tipo==='green'?'selected':''}>✅ Completado</option>
+          <option value="blue" ${a.tipo==='blue'?'selected':''}>ℹ️ Información</option>
+          <option value="red" ${a.tipo==='red'?'selected':''}>🚨 Urgente</option>
+        </select></div>
+      </div>
+      <div class="f-group" style="margin-bottom:0"><label class="f-label">Detalle</label><textarea class="f-textarea" id="ae-detalle-${i}" style="min-height:50px">${a.detalle}</textarea></div>
+      <div style="text-align:right"><button class="btn-sm" style="background:#ffebee;color:#c00000" onclick="eliminarAlertaEditor(${i})">Eliminar</button></div>
+    </div>`).join('');
+  openModal('modalAlertas');
+}
+
+function agregarAlertaEditor() { ALERTAS.push({titulo:'Nueva alerta', detalle:'Descripción...', tipo:'amber'}); openModalAlertas(); }
+function eliminarAlertaEditor(i) { ALERTAS.splice(i, 1); openModalAlertas(); }
+
+async function guardarAlertas() {
+  ALERTAS = ALERTAS.map((a,i) => ({
+    titulo: document.getElementById(`ae-titulo-${i}`).value,
+    detalle: document.getElementById(`ae-detalle-${i}`).value,
+    tipo: document.getElementById(`ae-tipo-${i}`).value,
+  }));
+  renderAlertas();
+  closeModal('modalAlertas');
+  try {
+    await postToSheets('updateAlertas', {alertas: JSON.stringify(ALERTAS)});
+    showToast('✔ Alertas guardadas en Sheets');
+  } catch(e) { showToast('Alertas actualizadas (sin conexión a Sheets)', false); }
+}
+
+// ── EDITAR FORMACIÓN ──
+function editarFormacion(id) {
+  const item = FORMACION.find(f => f.id === id);
+  if (!item) return;
+  document.getElementById('edit-form-id').value = id;
+  document.getElementById('edit-form-tema').value = item.tema;
+  document.getElementById('edit-form-bloque').value = item.bloque;
+  document.getElementById('edit-form-resp').value = item.resp;
+  document.getElementById('edit-form-dirigido').value = item.dirigido;
+  const grid = document.getElementById('edit-form-meses');
+  grid.innerHTML = MONTHS.map((m,i) => {
+    const v = item.meses[i+1] || '';
+    return `<div style="text-align:center">
+      <div style="font-size:11px;color:var(--muted);margin-bottom:4px">${m}</div>
+      <select class="f-select" style="padding:4px;font-size:12px" id="efm-mes-${i+1}">
+        <option value="">—</option>
+        <option value="✔" ${v==='✔'?'selected':''}>✔ Real.</option>
+        <option value="◆" ${v==='◆'?'selected':''}>◆ Plan.</option>
+        <option value="●" ${v==='●'?'selected':''}>● Conf.</option>
+      </select>
+    </div>`;
+  }).join('');
+  openModal('modalEditarFormacion');
+}
+
+async function guardarEdicionFormacion() {
+  const id = parseInt(document.getElementById('edit-form-id').value);
+  const item = FORMACION.find(f => f.id === id);
+  if (!item) return;
+  item.tema = document.getElementById('edit-form-tema').value;
+  item.bloque = document.getElementById('edit-form-bloque').value;
+  item.resp = document.getElementById('edit-form-resp').value;
+  item.dirigido = document.getElementById('edit-form-dirigido').value;
+  for (let m=1; m<=12; m++) {
+    const v = document.getElementById(`efm-mes-${m}`).value;
+    if (v) item.meses[m] = v; else delete item.meses[m];
+  }
+  closeModal('modalEditarFormacion');
+  renderFormacion(); updateKpis();
+  try {
+    await postToSheets('editFormacion', {id, tema:item.tema, bloque:item.bloque, resp:item.resp, meses: JSON.stringify(item.meses)});
+    showToast('✔ Actividad actualizada en Sheets');
+  } catch(e) { showToast('Actividad actualizada localmente', false); }
+}
+
+// ── EDITAR DESEMPEÑO ──
+function editarDesempenio(puesto) {
+  openModalForEval(puesto);
+  const d = DESEMPENIO.find(x => x.puesto === puesto);
+  if (!d) return;
+  if (d.puntaje) document.getElementById('ev-puntaje').value = d.puntaje;
+  if (d.estado) document.getElementById('ev-estado').value = d.estado;
+  if (d.obs) document.getElementById('ev-comentario').value = d.obs;
+}
+
+// ── EDITAR / ELIMINAR EFICACIA ──
+function editarEficacia(i) {
+  const e = EFICACIA[i];
+  document.getElementById('edit-ef-idx').value = i;
+  document.getElementById('edit-ef-tema').value = e.tema;
+  document.getElementById('edit-ef-fecha').value = e.fecha || '';
+  document.getElementById('edit-ef-cantidad').value = e.cantidad || '';
+  document.getElementById('edit-ef-resultado').value = e.resultado;
+  document.getElementById('edit-ef-obs').value = e.obs || '';
+  openModal('modalEditarEficacia');
+}
+async function guardarEdicionEficacia() {
+  const i = parseInt(document.getElementById('edit-ef-idx').value);
+  EFICACIA[i] = {
+    tema: document.getElementById('edit-ef-tema').value,
+    fecha: document.getElementById('edit-ef-fecha').value,
+    cantidad: document.getElementById('edit-ef-cantidad').value,
+    resultado: document.getElementById('edit-ef-resultado').value,
+    obs: document.getElementById('edit-ef-obs').value,
+  };
+  closeModal('modalEditarEficacia');
+  renderEficaciaTable(); updateKpis();
+  try {
+    await postToSheets('editEficacia', {idx:i, ...EFICACIA[i]});
+    showToast('✔ Eficacia actualizada en Sheets');
+  } catch(e) { showToast('Eficacia actualizada localmente', false); }
+}
+function eliminarEficacia(i) {
+  if (!confirm('¿Eliminar este registro de eficacia?')) return;
+  EFICACIA.splice(i, 1);
+  renderEficaciaTable(); updateKpis();
+}
+
+// ── SYNC SHEETS ──
+async function syncSheets() {
+  document.getElementById('gsStatusText').textContent = 'Sincronizando…';
+  try {
+    const res = await fetch(GS_URL);
+    const data = await res.json();
+    document.getElementById('gsDot').classList.remove('offline');
+    document.getElementById('gsStatusText').textContent = 'Conectado a Google Sheets';
+    if (data.Formacion && data.Formacion.length) applyFormacion(data.Formacion);
+    if (data.Desempenio && data.Desempenio.length) applyDesempenio(data.Desempenio);
+    if (data.KPIs && data.KPIs.length) applyKpis(data.KPIs);
+    if (data.Alertas && data.Alertas.length) { ALERTAS = data.Alertas; renderAlertas(); }
+    renderFormacion(); renderDesempenio(); renderEficaciaTable(); updateKpis(); updatePerfilKpis();
+    showToast('✔ Datos sincronizados');
+  } catch(e) {
+    document.getElementById('gsDot').classList.add('offline');
+    document.getElementById('gsStatusText').textContent = 'Error de conexión';
+  }
+}
+
+function applyFormacion(rows) {
+  rows.forEach(row => {
+    const id = parseInt(row.ID);
+    const item = FORMACION.find(f => f.id === id);
+    if (!item) return;
+    const meses = {1:'ENE',2:'FEB',3:'MAR',4:'ABR',5:'MAY',6:'JUN',7:'JUL',8:'AGO',9:'SEP',10:'OCT',11:'NOV',12:'DIC'};
+    Object.entries(meses).forEach(([num,name]) => { if (row[name]) item.meses[parseInt(num)] = row[name]; });
+    if (row.Responsable) item.resp = row.Responsable;
+  });
+}
+function applyDesempenio(rows) {
+  rows.forEach(row => {
+    const idx = DESEMPENIO.findIndex(d => d.puesto === row.Puesto);
+    if (idx >= 0) {
+      if (row.Puntaje) DESEMPENIO[idx].puntaje = parseInt(row.Puntaje);
+      if (row.Estado) DESEMPENIO[idx].estado = row.Estado;
+      if (row.Observaciones) DESEMPENIO[idx].obs = row.Observaciones;
+      if (row.Competencias) DESEMPENIO[idx].competencias = row.Competencias;
+      if (row.Area) DESEMPENIO[idx].area = row.Area;
+    }
+  });
+}
+function applyKpis(rows) {
+  rows.forEach(row => {
+    if (row.Codigo === 'IG-07' && row.ValorActual) {
+      const v = parseFloat(row.ValorActual);
+      document.getElementById('kpi-ig07').textContent = v + '%';
+      document.getElementById('pb-ig07').style.width = Math.min(v,100) + '%';
+    }
+  });
+}
+
+let chartsBuilt = false;
+function buildCharts() {
+  if (chartsBuilt) return; chartsBuilt = true;
+  const mesData = [0,1,4,6,8,4,4,5,5,4,3,1];
+  const realizadasData = MONTHS.map((_,i) => FORMACION.reduce((a,f)=>a+(f.meses[i+1]==='✔'?1:0),0));
+  const aColors = ['#1F3864','#2F5496','#4FA8D8','#375623','#B87333','#BDD7EE','#5a6680'];
+  const areaLabels = ['Gerencia','S&H','Téc/Op','SGC','RRHH','Compras','Contab.'];
+  new Chart(document.getElementById('chartAreas'),{type:'doughnut',data:{labels:areaLabels,datasets:[{data:[2,2,2,1,1,2,1],backgroundColor:aColors,borderWidth:2,borderColor:'#fff'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}});
+  const leg = document.getElementById('legendAreas');
+  areaLabels.forEach((l,i) => { leg.innerHTML+=`<span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:2px;background:${aColors[i]}"></span>${l}</span>`; });
+  new Chart(document.getElementById('chartFormMes'),{type:'bar',data:{labels:MONTHS,datasets:[{label:'Actividades',data:mesData,backgroundColor:'#2F5496',borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1}}}}});
+  new Chart(document.getElementById('chartKpiForm'),{type:'bar',data:{labels:MONTHS,datasets:[{label:'Planificadas',data:mesData,backgroundColor:'rgba(47,84,150,.25)',borderRadius:4},{label:'Realizadas',data:realizadasData,backgroundColor:'#375623',borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,scales:{y:{beginAtZero:true,ticks:{stepSize:1}}},plugins:{legend:{display:false}}}});
+  new Chart(document.getElementById('chartCategoria'),{type:'bar',data:{labels:['SGC / Calidad','Seguridad & Higiene','Habilidades'],datasets:[{data:[10,14,7],backgroundColor:['#2F5496','#375623','#B87333'],borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{beginAtZero:true}}}});
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  loadPerfilesFromStorage();
+  renderAlertas();
+  renderFormacion(); renderPerfiles(); renderDesempenio(); renderEficaciaTable();
+  buildCharts(); updateKpis(); updatePerfilKpis(); syncSheets();
+});
+</script>
+</body>
+</html>
