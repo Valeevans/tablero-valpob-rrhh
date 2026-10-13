@@ -3,19 +3,40 @@ function doGet(e) {
   if (e && e.parameter && e.parameter.store) return getStore_();
 
   const ss = SpreadsheetApp.getActiveSpreadsheet();
-  const sheets = ['Formacion','Perfiles','Desempenio','KPIs'];
+  const sheets = ['Formacion','Perfiles','Desempenio','KPIs','Alertas'];
   const out = {};
   sheets.forEach(name => {
     const sh = ss.getSheetByName(name);
     if (!sh) return;
-    const [headers, ...rows] = sh.getDataRange().getValues();
-    out[name] = rows.map(r => {
-      const obj = {};
-      headers.forEach((h,i) => obj[h] = r[i]);
-      return obj;
-    });
+    const data = sh.getDataRange().getValues();
+    if (data.length < 2) return;
+    const headers = data[0];
+    const rows = data.slice(1);
+    if (name === 'Alertas') {
+      // Alertas: una fila por alerta
+      out['Alertas'] = rows
+        .filter(r => r[0])
+        .map(r => ({ titulo: r[0], detalle: r[1], tipo: r[2] }));
+    } else if (name === 'Perfiles') {
+      out['Perfiles'] = rows
+        .filter(r => r[0])
+        .map(r => ({
+          puesto: r[0], area: r[1], tipo: r[2],
+          formacion: r[3], exp: r[4],
+          comps: r[5] ? JSON.parse(r[5]) : {},
+          responsabilidades: r[6] || '',
+          tareas: r[7] || ''
+        }));
+    } else {
+      out[name] = rows.map(r => {
+        const obj = {};
+        headers.forEach((h, i) => obj[h] = r[i]);
+        return obj;
+      });
+    }
   });
-  return ContentService.createTextOutput(JSON.stringify(out)).setMimeType(ContentService.MimeType.JSON);
+  return ContentService.createTextOutput(JSON.stringify(out))
+    .setMimeType(ContentService.MimeType.JSON);
 }
 
 function doPost(e) {
@@ -33,10 +54,29 @@ function doPost(e) {
     const mesCol = headers.indexOf(getMesName(data.mes));
     for (let i = 1; i < vals.length; i++) {
       if (parseInt(vals[i][0]) === parseInt(data.id)) {
-        if (mesCol >= 0) sh.getRange(i+1, mesCol+1).setValue(data.estado);
+        if (mesCol > -1) sh.getRange(i+1, mesCol+1).setValue(data.estado);
         sh.getRange(i+1, headers.indexOf('Obs')+1).setValue(
           `Fecha: ${data.fecha} | Asistentes: ${data.asistentes} (${data.cantidad}) | ${data.obs}`
         );
+        break;
+      }
+    }
+  }
+
+  if (action === 'editFormacion') {
+    const sh = ss.getSheetByName('Formacion');
+    const vals = sh.getDataRange().getValues();
+    const headers = vals[0];
+    const meses = JSON.parse(data.meses || '{}');
+    for (let i = 1; i < vals.length; i++) {
+      if (parseInt(vals[i][0]) === parseInt(data.id)) {
+        if (headers.indexOf('Tema') > -1) sh.getRange(i+1, headers.indexOf('Tema')+1).setValue(data.tema);
+        if (headers.indexOf('Categoria') > -1) sh.getRange(i+1, headers.indexOf('Categoria')+1).setValue(data.bloque);
+        if (headers.indexOf('Responsable') > -1) sh.getRange(i+1, headers.indexOf('Responsable')+1).setValue(data.resp);
+        Object.entries(meses).forEach(([mes, val]) => {
+          const col = headers.indexOf(getMesName(parseInt(mes)));
+          if (col > -1) sh.getRange(i+1, col+1).setValue(val);
+        });
         break;
       }
     }
@@ -53,10 +93,13 @@ function doPost(e) {
         sh.getRange(i+1, headers.indexOf('Estado')+1).setValue(data.estado);
         sh.getRange(i+1, headers.indexOf('Observaciones')+1).setValue(data.obs);
         sh.getRange(i+1, headers.indexOf('Competencias')+1).setValue(data.competencias);
+        if (data.fecha && headers.indexOf('Fecha') > -1) sh.getRange(i+1, headers.indexOf('Fecha')+1).setValue(data.fecha);
         found = true; break;
       }
     }
-    if (!found) sh.appendRow([data.puesto, data.area, data.puntaje, data.competencias, data.estado, data.obs]);
+    if (!found) {
+      sh.appendRow([data.puesto, data.area || '', data.puntaje, data.competencias, data.estado, data.obs, data.fecha || '']);
+    }
   }
 
   if (action === 'addEficacia') {
@@ -64,7 +107,70 @@ function doPost(e) {
     sh.appendRow([data.id, data.tema, data.fecha, data.cantidad, data.resultado, data.obs, new Date()]);
   }
 
-  return ContentService.createTextOutput(JSON.stringify({ok:true})).setMimeType(ContentService.MimeType.JSON);
+  if (action === 'editEficacia') {
+    const sh = ss.getSheetByName('KPIs');
+    if (sh) {
+      const vals = sh.getDataRange().getValues();
+      const idx = parseInt(data.idx) + 2; // +1 header +1 base-1
+      if (idx < vals.length + 1) {
+        sh.getRange(idx, 1, 1, 6).setValues([[
+          vals[idx-1][0], data.tema, data.fecha, data.cantidad, data.resultado, data.obs
+        ]]);
+      }
+    }
+  }
+
+  // ── ALERTAS ──
+  if (action === 'updateAlertas') {
+    let sh = ss.getSheetByName('Alertas');
+    if (!sh) {
+      sh = ss.insertSheet('Alertas');
+      sh.appendRow(['Titulo', 'Detalle', 'Tipo', 'FechaActualizacion']);
+    }
+    const alertas = JSON.parse(data.alertas || '[]');
+    // Limpiar y reescribir
+    const lastRow = sh.getLastRow();
+    if (lastRow > 1) sh.getRange(2, 1, lastRow - 1, 4).clearContent();
+    alertas.forEach(a => {
+      sh.appendRow([a.titulo, a.detalle, a.tipo, new Date()]);
+    });
+  }
+
+  // ── PERFILES (versión anterior; el tablero nuevo guarda los perfiles en "Store") ──
+  if (action === 'updatePerfil') {
+    let sh = ss.getSheetByName('Perfiles');
+    if (!sh) {
+      sh = ss.insertSheet('Perfiles');
+      sh.appendRow(['Puesto','Area','Tipo','Formacion','Experiencia','Competencias','Responsabilidades','Tareas','FechaActualizacion']);
+    }
+    const perfil = JSON.parse(data.perfil || '{}');
+    const vals = sh.getDataRange().getValues();
+    let found = false;
+    for (let i = 1; i < vals.length; i++) {
+      if (vals[i][0] === perfil.puesto) {
+        sh.getRange(i+1, 1, 1, 9).setValues([[
+          perfil.puesto, perfil.area, perfil.tipo, perfil.formacion, perfil.exp,
+          JSON.stringify(perfil.comps || {}),
+          perfil.responsabilidades || '',
+          perfil.tareas || '',
+          new Date()
+        ]]);
+        found = true; break;
+      }
+    }
+    if (!found) {
+      sh.appendRow([
+        perfil.puesto, perfil.area, perfil.tipo, perfil.formacion, perfil.exp,
+        JSON.stringify(perfil.comps || {}),
+        perfil.responsabilidades || '',
+        perfil.tareas || '',
+        new Date()
+      ]);
+    }
+  }
+
+  return ContentService.createTextOutput(JSON.stringify({ok:true}))
+    .setMimeType(ContentService.MimeType.JSON);
 }
 
 function getMesName(num) {
