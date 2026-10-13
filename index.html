@@ -121,6 +121,37 @@ body{font-family:'DM Sans',sans-serif;background:#EEF1F8;color:var(--text);min-h
 .comp-eval-item{display:flex;align-items:center;justify-content:space-between;font-size:12px;padding:6px 8px;background:var(--gray);border-radius:6px;}
 .comp-eval-item label{color:var(--muted);}
 .comp-score-select{width:60px;padding:3px 6px;border:1px solid var(--border);border-radius:4px;font-size:12px;}
+/* ── nuevos: catálogos, nómina, ficha ── */
+.comp-dot.range{background:#A9D5EE;}
+.comp-row,.req-row{display:flex;gap:8px;align-items:center;margin-bottom:8px;}
+.cr-lbl{font-size:11px;color:var(--muted);white-space:nowrap;}
+.btn-del{background:#ffebee;color:#c00000;border:none;border-radius:5px;padding:6px 9px;cursor:pointer;font-size:12px;font-family:'DM Sans',sans-serif;}
+.btn-del:hover{background:#ffcdd2;}
+.btn-mini{margin-top:4px;font-size:12px;padding:6px 12px;}
+.req-chip{display:inline-block;background:#EEF2FF;color:var(--navy);border:1px solid #D6DEF5;border-radius:12px;padding:2px 9px;font-size:11px;margin:2px 4px 2px 0;}
+.seg{display:inline-flex;border:1px solid var(--border);border-radius:7px;overflow:hidden;background:white;}
+.seg button{border:none;background:white;padding:6px 14px;font-size:12px;cursor:pointer;color:var(--muted);font-family:'DM Sans',sans-serif;}
+.seg button.active{background:var(--navy);color:white;}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px;}
+.emp-checklist{max-height:190px;overflow-y:auto;border:1px solid var(--border);border-radius:7px;padding:6px 10px;}
+.emp-checklist label{display:flex;gap:8px;align-items:center;font-size:12.5px;padding:3px 0;cursor:pointer;}
+.ficha-head{background:var(--navy);color:white;border-radius:10px;padding:16px 20px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:16px;}
+.ficha-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;}
+.ficha-dato{background:var(--gray);border-radius:8px;padding:10px 12px;}
+.ficha-dato .k{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;}
+.ficha-dato .v{font-size:14px;font-weight:600;color:var(--navy);margin-top:3px;}
+.ficha-sec{border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:14px;}
+.ficha-sec-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap;}
+.ficha-sec-title{font-size:12px;font-weight:600;color:var(--navy);text-transform:uppercase;letter-spacing:.7px;}
+.mini-table{width:100%;border-collapse:collapse;font-size:12.5px;}
+.mini-table th{background:#EEF1F8;color:var(--navy);padding:6px 9px;text-align:left;font-weight:600;font-size:11px;}
+.mini-table td{padding:6px 9px;border-bottom:1px solid var(--border);vertical-align:middle;}
+.mini-table tr.year-row td{background:#F6F9FE;font-weight:600;color:var(--blue);font-size:11.5px;}
+.badge-red{background:var(--red-bg);color:var(--red);}
+.badge-gray{background:#EEF1F8;color:var(--muted);}
+.store-banner{display:none;background:#FFF2CC;color:#7a5200;border-bottom:1px solid #f4d27a;padding:8px 28px;font-size:12.5px;}
+.empty-row{padding:16px;color:var(--muted);text-align:center;font-size:12.5px;}
+@media(max-width:800px){.ficha-grid{grid-template-columns:1fr 1fr;}.f-row{grid-template-columns:1fr;}}
 </style>
 </head>
 <body>
@@ -185,16 +216,18 @@ body{font-family:'DM Sans',sans-serif;background:#EEF1F8;color:var(--text);min-h
   <button class="tab-btn active" onclick="showTab('resumen',this)">Resumen</button>
   <button class="tab-btn" onclick="showTab('formacion',this)">Plan de formación</button>
   <button class="tab-btn" onclick="showTab('perfiles',this)">Perfiles</button>
+  <button class="tab-btn" onclick="showTab('nomina',this)">Nómina</button>
   <button class="tab-btn" onclick="showTab('desempenio',this)">Desempeño</button>
   <button class="tab-btn" onclick="showTab('kpis',this)">KPIs de RRHH</button>
   <button class="tab-btn" onclick="showTab('carga',this)">📝 Cargar datos</button>
   <button class="tab-btn" onclick="showTab('organigrama',this)">Organigrama</button>
 </div>
+<div class="store-banner" id="storeBanner"></div>
 
 <!-- RESUMEN -->
 <div class="page active" id="tab-resumen">
   <div class="kpi-row">
-    <div class="kpi-card"><div class="kpi-label">Personal activo</div><div class="kpi-val" id="r-puestos-total">15</div><div class="kpi-sub">puestos cubiertos</div></div>
+    <div class="kpi-card"><div class="kpi-label">Personal activo</div><div class="kpi-val" id="r-puestos-total">15</div><div class="kpi-sub" id="r-puestos-sub">puestos cubiertos</div></div>
     <div class="kpi-card green"><div class="kpi-label">Formación completada</div><div class="kpi-val" id="r-form-pct">—</div><div class="kpi-sub" id="r-form-sub">cargando…</div></div>
     <div class="kpi-card amber"><div class="kpi-label">Pendientes año</div><div class="kpi-val" id="r-form-pend">—</div><div class="kpi-sub">actividades</div></div>
     <div class="kpi-card"><div class="kpi-label">Perfiles documentados</div><div class="kpi-val" id="r-perfiles-doc">15</div><div class="kpi-sub" id="r-perfiles-sub">de 15 puestos</div></div>
@@ -221,7 +254,7 @@ body{font-family:'DM Sans',sans-serif;background:#EEF1F8;color:var(--text);min-h
       <div class="chart-wrap" style="height:200px;"><canvas id="chartFormMes"></canvas></div>
     </div>
     <div class="card">
-      <div class="card-title">Personal por área</div>
+      <div class="card-title" id="chartAreasTitle">Personal por área</div>
       <div class="chart-wrap" style="height:200px;"><canvas id="chartAreas"></canvas></div>
       <div id="legendAreas" style="display:flex;flex-wrap:wrap;gap:10px;font-size:11.5px;margin-top:10px;color:var(--muted);"></div>
     </div>
@@ -279,11 +312,43 @@ body{font-family:'DM Sans',sans-serif;background:#EEF1F8;color:var(--text);min-h
     <div class="kpi-card"><div class="kpi-label">Competencias</div><div class="kpi-val" id="p-competencias">—</div><div class="kpi-sub">categorías mapeadas</div></div>
     <div class="kpi-card amber"><div class="kpi-label">Por completar</div><div class="kpi-val" id="p-pendientes">0</div><div class="kpi-sub" id="p-pend-sub">Todos documentados</div></div>
   </div>
-  <div style="display:flex;justify-content:flex-end;gap:10px;margin-bottom:14px;">
+  <div style="display:flex;justify-content:flex-end;gap:10px;margin-bottom:14px;flex-wrap:wrap">
+    <button class="btn-sm btn-cargar" onclick="openModalCatalogos('comp')">⚙ Catálogo de competencias y requisitos</button>
     <button class="btn-sm btn-cargar" onclick="descargarTodosPerfilesPDF()">⬇ Descargar todos los perfiles (PDF)</button>
     <button class="btn-primary" onclick="openModalPerfil()">+ Agregar perfil</button>
   </div>
   <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:16px;" id="perfilesGrid"></div>
+</div>
+
+<!-- NÓMINA -->
+<div class="page" id="tab-nomina">
+  <div class="kpi-row">
+    <div class="kpi-card"><div class="kpi-label">Personal activo</div><div class="kpi-val" id="n-activos">0</div><div class="kpi-sub">en nómina</div></div>
+    <div class="kpi-card green"><div class="kpi-label">Ingresos <span class="n-anio"></span></div><div class="kpi-val" id="n-ingresos">0</div><div class="kpi-sub">altas del año</div></div>
+    <div class="kpi-card red"><div class="kpi-label">Bajas <span class="n-anio"></span></div><div class="kpi-val" id="n-bajas">0</div><div class="kpi-sub">egresos del año</div></div>
+    <div class="kpi-card amber"><div class="kpi-label">Inducción pendiente</div><div class="kpi-val" id="n-induccion">0</div><div class="kpi-sub">activos sin inducción</div></div>
+    <div class="kpi-card"><div class="kpi-label">Evaluados <span class="n-anio"></span></div><div class="kpi-val" id="n-evaluados">—</div><div class="kpi-sub" id="n-evaluados-sub">de activos</div></div>
+    <div class="kpi-card amber"><div class="kpi-label">Requisitos a revisar</div><div class="kpi-val" id="n-req">0</div><div class="kpi-sub">faltantes o vencidos</div></div>
+  </div>
+  <div class="toolbar">
+    <input type="text" class="f-input" style="width:240px" id="nomBuscar" placeholder="Buscar por nombre, DNI o legajo…" oninput="renderNomina()">
+    <select class="f-select" style="width:auto" id="nomPuesto" onchange="renderNomina()"><option value="">Todos los puestos</option></select>
+    <select class="f-select" style="width:auto" id="nomEstado" onchange="renderNomina()">
+      <option value="Activo">Activos</option><option value="Baja">Bajas</option><option value="">Todos</option>
+    </select>
+    <div style="flex:1"></div>
+    <button class="btn-sm btn-cargar" onclick="openModal('modalImport')">⬆ Importar desde Excel</button>
+    <button class="btn-primary" onclick="abrirModalEmpleado()">+ Alta de empleado</button>
+  </div>
+  <div class="card" style="padding:0;overflow-x:auto;">
+    <table class="form-table">
+      <thead><tr>
+        <th>Leg.</th><th>Apellido y nombre</th><th>Puesto / Área</th><th>Ingreso</th><th>Antig.</th>
+        <th>Inducción</th><th>Requisitos</th><th>Capac. <span class="n-anio"></span></th><th style="text-align:center">Desempeño</th><th>Estado</th><th style="width:170px">Acciones</th>
+      </tr></thead>
+      <tbody id="nominaTbody"></tbody>
+    </table>
+  </div>
 </div>
 
 <!-- DESEMPEÑO -->
@@ -398,12 +463,16 @@ body{font-family:'DM Sans',sans-serif;background:#EEF1F8;color:var(--text);min-h
 
 <!-- ORGANIGRAMA -->
 <div class="page" id="tab-organigrama">
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;gap:12px;flex-wrap:wrap">
     <div>
       <div class="section-title" style="margin-bottom:4px">Organigrama GROUP VALPOB S.R.L.</div>
-      <div style="font-size:12px;color:var(--muted)" id="org-codigo">O-RH-001 · Rev.03 · 06/2026</div>
+      <div style="font-size:12px;color:var(--muted)"><span id="org-codigo">O-RH-001 · Rev.03 · 06/2026</span> · <span id="org-modo-nota">Funcional — se arma con los perfiles de puesto</span></div>
     </div>
-    <div style="display:flex;gap:10px">
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+      <div class="seg">
+        <button id="orgModoF" class="active" onclick="setOrgModo('funcional')">Funcional</button>
+        <button id="orgModoN" onclick="setOrgModo('nominal')">Nominal</button>
+      </div>
       <button class="btn-sm btn-cargar" onclick="irAPerfilesYCrear()">+ Agregar puesto (perfil)</button>
       <button class="btn-sm btn-cargar" onclick="openModalOrgPuesto()">+ Asesor externo</button>
       <button class="btn-primary" style="font-size:12px;padding:6px 16px" onclick="exportOrgSVG()">Exportar SVG</button>
@@ -433,6 +502,7 @@ body{font-family:'DM Sans',sans-serif;background:#EEF1F8;color:var(--text);min-h
       <g id="orgContent"></g>
     </svg>
   </div>
+  <div id="orgSinPuesto"></div>
 
   <!-- Tabla editable de puestos -->
   <div class="card" style="margin-top:16px">
@@ -486,8 +556,20 @@ body{font-family:'DM Sans',sans-serif;background:#EEF1F8;color:var(--text);min-h
       <div class="f-group"><label class="f-label">Fecha de realización</label><input type="date" class="f-input" id="cap-fecha"></div>
       <div class="f-group"><label class="f-label">Estado</label><select class="f-select" id="cap-estado"><option value="✔">✔ Realizada</option><option value="◆">◆ Planificada</option><option value="●">● A confirmar</option></select></div>
     </div>
-    <div class="f-group"><label class="f-label">Asistentes (nombres separados por coma)</label><input type="text" class="f-input" id="cap-asistentes" placeholder="Ej: María García, Juan López"></div>
-    <div class="f-group"><label class="f-label">Cantidad de asistentes</label><input type="number" class="f-input" id="cap-cantidad" min="0" placeholder="0"></div>
+    <div class="f-group">
+      <label class="f-label">Asistentes de la nómina <span style="font-weight:400">(queda registrado en la ficha de cada empleado)</span></label>
+      <div style="display:flex;gap:8px;margin-bottom:6px">
+        <input type="text" class="f-input" id="cap-emp-buscar" placeholder="Filtrar…" oninput="renderCapEmpList()">
+        <button class="btn-secondary" style="padding:6px 12px;font-size:12px;white-space:nowrap" onclick="capEmpTodos(true)">Todos</button>
+        <button class="btn-secondary" style="padding:6px 12px;font-size:12px;white-space:nowrap" onclick="capEmpTodos(false)">Ninguno</button>
+      </div>
+      <div class="emp-checklist" id="capEmpList"></div>
+    </div>
+    <div class="f-group"><label class="f-label">Otros asistentes (fuera de nómina, separados por coma)</label><input type="text" class="f-input" id="cap-asistentes" placeholder="Ej: personal de contratista"></div>
+    <div class="f-row">
+      <div class="f-group"><label class="f-label">Cantidad de asistentes</label><input type="number" class="f-input" id="cap-cantidad" min="0" placeholder="0"></div>
+      <div class="f-group"><label class="f-label">Duración (horas)</label><input type="number" class="f-input" id="cap-horas" min="0" step="0.5" placeholder="Ej: 2"></div>
+    </div>
     <div class="f-group"><label class="f-label">Observaciones</label><textarea class="f-textarea" id="cap-obs" placeholder="Modalidad, duración, material utilizado, etc."></textarea></div>
     <div class="form-actions">
       <button class="btn-secondary" onclick="closeModal('modalCapacitacion')">Cancelar</button>
@@ -547,7 +629,7 @@ body{font-family:'DM Sans',sans-serif;background:#EEF1F8;color:var(--text);min-h
 </div>
 
 <div class="modal-overlay" id="modalPerfil">
-  <div class="modal" style="width:min(640px,95vw)">
+  <div class="modal" style="width:min(760px,95vw)">
     <button class="modal-close" onclick="closeModal('modalPerfil')">✕</button>
     <div class="modal-title" id="modalPerfilTitulo">+ Agregar perfil</div>
     <input type="hidden" id="perfil-edit-idx" value="">
@@ -567,10 +649,19 @@ body{font-family:'DM Sans',sans-serif;background:#EEF1F8;color:var(--text);min-h
     <div class="f-group"><label class="f-label">Experiencia mínima</label><select class="f-select" id="perfil-exp"><option value="Sin experiencia previa">Sin experiencia previa</option><option value="6 meses">6 meses</option><option value="1 año">1 año</option><option value="2 años">2 años</option><option value="3 años">3 años</option><option value="5 años">5 años</option></select></div>
     <div class="f-group"><label class="f-label">Responsabilidades principales</label><textarea class="f-textarea" id="perfil-responsabilidades" placeholder="Ej: Gestionar compras, evaluar proveedores, asegurar cumplimiento del SGC en el área..."></textarea></div>
     <div class="f-group"><label class="f-label">Tareas habituales</label><textarea class="f-textarea" id="perfil-tareas" placeholder="Ej: Emitir órdenes de compra, actualizar listado de proveedores, registrar movimientos de stock..."></textarea></div>
-    <div class="f-group">
-      <label class="f-label" style="margin-bottom:10px">Competencias (nombre y nivel 1–4)</label>
-      <div id="perfilCompsEditor" style="display:flex;flex-direction:column;gap:8px;"></div>
-      <button class="btn-secondary" style="margin-top:8px;font-size:12px;padding:6px 12px" onclick="agregarCompPerfil()">+ Agregar competencia</button>
+    <div class="f-group" style="background:#F9FAFC;border:1px solid var(--border);border-radius:8px;padding:12px">
+      <label class="f-label" style="color:var(--navy);margin-bottom:10px">Requisitos del puesto</label>
+      <div id="perfilReqEditor"></div>
+      <button class="btn-secondary btn-mini" onclick="agregarReqPerfil()">+ Agregar requisito</button>
+    </div>
+    <div class="f-group" style="background:#F9FAFC;border:1px solid var(--border);border-radius:8px;padding:12px">
+      <label class="f-label" style="color:var(--navy);margin-bottom:4px">Competencias requeridas</label>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:10px">Elegí la competencia del catálogo y definí el rango esperado: <strong>1</strong> Básico · <strong>2</strong> Intermedio · <strong>3</strong> Avanzado · <strong>4</strong> Experto. Si mínimo y máximo son iguales, se exige ese nivel exacto.</div>
+      <div id="perfilCompsEditor"></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn-secondary btn-mini" onclick="agregarCompPerfil()">+ Agregar competencia</button>
+        <button class="btn-secondary btn-mini" onclick="openModalCatalogos('comp')">⚙ Editar catálogo</button>
+      </div>
     </div>
     <div class="form-actions">
       <button class="btn-secondary" onclick="closeModal('modalPerfil')">Cancelar</button>
@@ -613,6 +704,146 @@ body{font-family:'DM Sans',sans-serif;background:#EEF1F8;color:var(--text);min-h
     <div class="form-actions">
       <button class="btn-secondary" onclick="closeModal('modalEditarEficacia')">Cancelar</button>
       <button class="btn-primary" onclick="guardarEdicionEficacia()">Guardar cambios</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ FICHA DE EMPLEADO ═══ -->
+<div class="modal-overlay" id="modalFicha">
+  <div class="modal" style="width:min(980px,96vw);padding:24px">
+    <button class="modal-close" onclick="closeModal('modalFicha')">✕</button>
+    <div id="fichaBody"></div>
+  </div>
+</div>
+
+<!-- ALTA / MODIFICACIÓN DE EMPLEADO -->
+<div class="modal-overlay" id="modalEmpleado">
+  <div class="modal" style="width:min(620px,95vw)">
+    <button class="modal-close" onclick="closeModal('modalEmpleado')">✕</button>
+    <div class="modal-title" id="empTitulo">+ Alta de empleado</div>
+    <input type="hidden" id="emp-id" value="">
+    <div class="f-row">
+      <div class="f-group"><label class="f-label">N° de legajo</label><input type="text" class="f-input" id="emp-legajo" placeholder="Ej: 045"></div>
+      <div class="f-group"><label class="f-label">DNI</label><input type="text" class="f-input" id="emp-dni" placeholder="Sin puntos"></div>
+    </div>
+    <div class="f-row">
+      <div class="f-group"><label class="f-label">Apellido *</label><input type="text" class="f-input" id="emp-apellido"></div>
+      <div class="f-group"><label class="f-label">Nombre *</label><input type="text" class="f-input" id="emp-nombre"></div>
+    </div>
+    <div class="f-row">
+      <div class="f-group"><label class="f-label">Puesto *</label><select class="f-select" id="emp-puesto" onchange="infoPuestoEmp()"></select></div>
+      <div class="f-group"><label class="f-label">Fecha de ingreso *</label><input type="date" class="f-input" id="emp-ingreso"></div>
+    </div>
+    <div id="emp-puesto-info" style="font-size:11.5px;color:var(--muted);margin:-6px 0 12px"></div>
+    <div class="f-row">
+      <div class="f-group"><label class="f-label">Inducción de ingreso</label><select class="f-select" id="emp-ind-estado"><option value="Pendiente">Pendiente</option><option value="Realizada">Realizada</option></select></div>
+      <div class="f-group"><label class="f-label">Fecha de inducción</label><input type="date" class="f-input" id="emp-ind-fecha"></div>
+    </div>
+    <div class="f-group"><label class="f-label">Observaciones</label><textarea class="f-textarea" id="emp-obs" style="min-height:50px"></textarea></div>
+    <div class="form-actions">
+      <button class="btn-secondary" onclick="closeModal('modalEmpleado')">Cancelar</button>
+      <button class="btn-primary" onclick="guardarEmpleado()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- BAJA -->
+<div class="modal-overlay" id="modalBaja">
+  <div class="modal" style="width:min(480px,95vw)">
+    <button class="modal-close" onclick="closeModal('modalBaja')">✕</button>
+    <div class="modal-title">Dar de baja</div>
+    <input type="hidden" id="baja-id">
+    <div style="font-size:13px;margin:-8px 0 14px;color:var(--navy);font-weight:500" id="baja-nombre"></div>
+    <div class="f-row">
+      <div class="f-group"><label class="f-label">Fecha de baja *</label><input type="date" class="f-input" id="baja-fecha"></div>
+      <div class="f-group"><label class="f-label">Motivo</label><select class="f-select" id="baja-motivo"><option>Renuncia</option><option>Despido</option><option>Fin de contrato / obra</option><option>Período de prueba</option><option>Jubilación</option><option>Otro</option></select></div>
+    </div>
+    <div class="f-group"><label class="f-label">Detalle</label><textarea class="f-textarea" id="baja-detalle" style="min-height:50px"></textarea></div>
+    <div style="font-size:11.5px;color:var(--muted)">La ficha queda guardada con todo su historial; podés reactivar al empleado si reingresa.</div>
+    <div class="form-actions">
+      <button class="btn-secondary" onclick="closeModal('modalBaja')">Cancelar</button>
+      <button class="btn-primary" style="background:var(--red)" onclick="confirmarBaja()">Confirmar baja</button>
+    </div>
+  </div>
+</div>
+
+<!-- CAPACITACIÓN DESDE LA FICHA -->
+<div class="modal-overlay" id="modalEmpCap">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modalEmpCap')">✕</button>
+    <div class="modal-title" id="empCapTitulo">📋 Registrar capacitación recibida</div>
+    <input type="hidden" id="ecap-id">
+    <div class="f-group"><label class="f-label">Actividad</label><select class="f-select" id="ecap-act" onchange="document.getElementById('ecap-otra-wrap').style.display=this.value==='__otra'?'block':'none'"></select></div>
+    <div class="f-group" id="ecap-otra-wrap" style="display:none"><label class="f-label">Nombre de la capacitación</label><input type="text" class="f-input" id="ecap-otra" placeholder="Ej: Curso de manejo defensivo (externo)"></div>
+    <div class="f-row">
+      <div class="f-group"><label class="f-label">Fecha *</label><input type="date" class="f-input" id="ecap-fecha"></div>
+      <div class="f-group"><label class="f-label">Duración (horas)</label><input type="number" class="f-input" id="ecap-horas" min="0" step="0.5"></div>
+    </div>
+    <div class="f-group"><label class="f-label">Eficacia</label><select class="f-select" id="ecap-eficacia"><option>Pendiente de evaluar</option><option>Eficaz</option><option>Parcialmente eficaz</option><option>No eficaz</option></select></div>
+    <div class="f-group"><label class="f-label">Observaciones</label><textarea class="f-textarea" id="ecap-obs" style="min-height:50px"></textarea></div>
+    <div class="form-actions">
+      <button class="btn-secondary" onclick="closeModal('modalEmpCap')">Cancelar</button>
+      <button class="btn-primary" onclick="guardarEmpCap()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- EVALUACIÓN DESDE LA FICHA -->
+<div class="modal-overlay" id="modalEmpEval">
+  <div class="modal" style="width:min(680px,95vw)">
+    <button class="modal-close" onclick="closeModal('modalEmpEval')">✕</button>
+    <div class="modal-title" id="empEvalTitulo">⭐ Evaluación de desempeño</div>
+    <input type="hidden" id="eev-id">
+    <div class="f-row">
+      <div class="f-group"><label class="f-label">Año evaluado</label><select class="f-select" id="eev-anio"></select></div>
+      <div class="f-group"><label class="f-label">Fecha de evaluación</label><input type="date" class="f-input" id="eev-fecha"></div>
+    </div>
+    <div class="f-group"><label class="f-label">Puntaje general</label><select class="f-select" id="eev-puntaje"><option value="">Seleccioná un puntaje</option><option value="5">5 — Supera ampliamente</option><option value="4">4 — Supera lo esperado</option><option value="3">3 — Cumple lo esperado</option><option value="2">2 — En desarrollo</option><option value="1">1 — Crítico</option></select></div>
+    <div class="f-group">
+      <label class="f-label">Competencias del puesto — nivel alcanzado (1 Básico · 2 Intermedio · 3 Avanzado · 4 Experto)</label>
+      <table class="mini-table"><thead><tr><th>Competencia</th><th style="text-align:center">Requerido</th><th style="text-align:center;width:90px">Alcanzado</th><th style="width:90px">Resultado</th></tr></thead><tbody id="eevComps"></tbody></table>
+    </div>
+    <div class="f-group"><label class="f-label">Estado</label><select class="f-select" id="eev-estado"><option>Evaluado</option><option>Con plan de mejora</option><option>En proceso</option></select></div>
+    <div class="f-group"><label class="f-label">Fortalezas, aspectos a mejorar y acuerdos</label><textarea class="f-textarea" id="eev-obs"></textarea></div>
+    <div class="form-actions">
+      <button class="btn-secondary" onclick="closeModal('modalEmpEval')">Cancelar</button>
+      <button class="btn-primary" onclick="guardarEmpEval()">Guardar evaluación</button>
+    </div>
+  </div>
+</div>
+
+<!-- IMPORTAR NÓMINA -->
+<div class="modal-overlay" id="modalImport">
+  <div class="modal" style="width:min(720px,95vw)">
+    <button class="modal-close" onclick="closeModal('modalImport')">✕</button>
+    <div class="modal-title">⬆ Importar nómina desde Excel</div>
+    <div style="font-size:12.5px;color:var(--text);line-height:1.55;margin-bottom:12px">
+      Copiá las filas desde Excel y pegalas abajo. Columnas en este orden:<br>
+      <strong>Legajo · Apellido y nombre · DNI · Puesto · Fecha de ingreso</strong><br>
+      <span style="color:var(--muted)">(También acepta Apellido y Nombre en columnas separadas: Legajo · Apellido · Nombre · DNI · Puesto · Fecha de ingreso.) El puesto tiene que llamarse igual que un perfil cargado; si no coincide, el empleado entra "sin puesto" y lo asignás después. Se saltean los DNI o legajos que ya existen.</span>
+    </div>
+    <textarea class="f-textarea" id="importTexto" style="min-height:180px;font-family:'DM Mono',monospace;font-size:12px" placeholder="001	Pérez, Juan	30111222	Ayudante	15/03/2022"></textarea>
+    <div id="importResultado" style="font-size:12.5px;margin-top:10px"></div>
+    <div class="form-actions">
+      <button class="btn-secondary" onclick="closeModal('modalImport')">Cerrar</button>
+      <button class="btn-primary" onclick="importarNomina()">Importar</button>
+    </div>
+  </div>
+</div>
+
+<!-- CATÁLOGOS -->
+<div class="modal-overlay" id="modalCatalogos">
+  <div class="modal" style="width:min(900px,96vw)">
+    <button class="modal-close" onclick="closeModal('modalCatalogos')">✕</button>
+    <div class="modal-title">⚙ Catálogo estandarizado</div>
+    <div class="seg" style="margin-bottom:14px">
+      <button id="catTabComp" class="active" onclick="catTab('comp')">Competencias</button>
+      <button id="catTabReq" onclick="catTab('req')">Requisitos</button>
+    </div>
+    <div id="catBody"></div>
+    <div class="form-actions">
+      <button class="btn-secondary" onclick="closeModal('modalCatalogos')">Cancelar</button>
+      <button class="btn-primary" onclick="guardarCatalogos()">Guardar catálogo</button>
     </div>
   </div>
 </div>
@@ -837,8 +1068,206 @@ PERFILES_DATA.forEach(p => {
   }
 });
 
-function savePerfilesToStorage() { /* migrado a Sheets */ }
-function loadPerfilesFromStorage() { /* migrado a Sheets */ }
+// ═══════════════════════════════════════════════════════════════════════
+//  CATÁLOGOS ESTANDARIZADOS — competencias y requisitos
+// ═══════════════════════════════════════════════════════════════════════
+const NIVELES = {1:'Básico', 2:'Intermedio', 3:'Avanzado', 4:'Experto'};
+const GRUPOS_COMP = ['Actitudinales', 'Gestión y liderazgo', 'Técnicas', 'SGC — ISO 9001'];
+
+let CAT_COMP = [
+  {nombre:'Responsabilidad',          grupo:'Actitudinales', def:'Cumple tareas y compromisos en tiempo y forma, y se hace cargo de los resultados.'},
+  {nombre:'Compromiso',               grupo:'Actitudinales', def:'Se involucra con los objetivos de la empresa y del equipo más allá de lo mínimo.'},
+  {nombre:'Proactividad',             grupo:'Actitudinales', def:'Se anticipa a los problemas y propone acciones sin esperar indicaciones.'},
+  {nombre:'Profesionalismo',          grupo:'Actitudinales', def:'Actúa con ética, prolijidad y criterio en su trabajo.'},
+  {nombre:'Adaptabilidad',            grupo:'Actitudinales', def:'Se ajusta a cambios de tareas, prioridades o condiciones de trabajo.'},
+  {nombre:'Trabajo en equipo',        grupo:'Actitudinales', def:'Colabora con otros y prioriza el resultado común.'},
+  {nombre:'Comunicación efectiva',    grupo:'Actitudinales', def:'Transmite y recibe información de forma clara y oportuna.'},
+  {nombre:'Capacidad de respuesta',   grupo:'Actitudinales', def:'Responde con rapidez y eficacia ante requerimientos e imprevistos.'},
+  {nombre:'Liderazgo',                grupo:'Gestión y liderazgo', def:'Orienta, motiva y conduce a su equipo hacia los objetivos.'},
+  {nombre:'Toma de decisiones',       grupo:'Gestión y liderazgo', def:'Decide con información y criterio, asumiendo las consecuencias.'},
+  {nombre:'Visión estratégica',       grupo:'Gestión y liderazgo', def:'Comprende el contexto y define el rumbo a mediano y largo plazo.'},
+  {nombre:'Planificación y control',  grupo:'Gestión y liderazgo', def:'Organiza recursos y plazos, y controla el avance del trabajo.'},
+  {nombre:'Negociación',              grupo:'Gestión y liderazgo', def:'Logra acuerdos convenientes con clientes, proveedores y equipos.'},
+  {nombre:'Resolución de problemas',  grupo:'Gestión y liderazgo', def:'Identifica causas y aplica soluciones eficaces.'},
+  {nombre:'Pensamiento analítico',    grupo:'Técnicas', def:'Analiza datos e información para llegar a conclusiones.'},
+  {nombre:'Conocimientos técnicos',   grupo:'Técnicas', def:'Domina los conocimientos y técnicas propios del puesto.'},
+  {nombre:'Herramientas informáticas (TIC)', grupo:'Técnicas', def:'Usa con solvencia los sistemas y herramientas digitales del puesto.'},
+  {nombre:'Gestión de registros',     grupo:'Técnicas', def:'Completa y mantiene registros exactos, completos y trazables.'},
+  {nombre:'Liderazgo del SGC',                  grupo:'SGC — ISO 9001', def:'Asume la responsabilidad por la eficacia del sistema de gestión.'},
+  {nombre:'Definición de política y objetivos', grupo:'SGC — ISO 9001', def:'Establece la política y objetivos y los comunica.'},
+  {nombre:'Revisión por la dirección',          grupo:'SGC — ISO 9001', def:'Analiza los resultados del sistema y decide acciones.'},
+  {nombre:'Conocimiento del SGC',               grupo:'SGC — ISO 9001', def:'Conoce la política, los objetivos y los procesos que lo involucran.'},
+  {nombre:'Gestión de riesgos y oportunidades', grupo:'SGC — ISO 9001', def:'Identifica riesgos y oportunidades de su área y propone acciones.'},
+  {nombre:'Control de procedimientos del área', grupo:'SGC — ISO 9001', def:'Asegura que su equipo aplique los procedimientos vigentes.'},
+  {nombre:'Mejora continua',                    grupo:'SGC — ISO 9001', def:'Promueve y participa en acciones de mejora.'},
+  {nombre:'Cumplimiento de procedimientos',     grupo:'SGC — ISO 9001', def:'Trabaja según los procedimientos e instructivos vigentes.'},
+  {nombre:'Control documental básico',          grupo:'SGC — ISO 9001', def:'Usa siempre la versión vigente de documentos y registros.'},
+  {nombre:'Reporte de no conformidades',        grupo:'SGC — ISO 9001', def:'Detecta y reporta desvíos, incidentes y no conformidades.'},
+];
+
+let CAT_REQ = [
+  {nombre:'Secundario completo',                 vence:false, def:'Presentar título o certificado analítico.'},
+  {nombre:'Residencia en Centenario',            vence:false, def:'Domicilio acreditado en Centenario.'},
+  {nombre:'Licencia de conducir',                vence:true,  def:'Obligatoria para supervisores y encargados de cuadrilla.'},
+  {nombre:'Certificaciones de hidrogruista',     vence:true,  def:'Certificaciones correspondientes para operar hidrogrúa.'},
+  {nombre:'Carnet de conducir profesional',      vence:true,  def:'Licencia profesional para camionero.'},
+  {nombre:'Antecedentes nacionales actualizados',vence:true,  def:'Certificado de antecedentes penales nacionales vigente.'},
+];
+
+// nombres viejos → nombre estandarizado del catálogo
+const COMP_ALIAS = {
+  'Pens. analítico':'Pensamiento analítico', 'Conocim. técnicos':'Conocimientos técnicos',
+  'Tools TIC':'Herramientas informáticas (TIC)', 'Plan. y control':'Planificación y control',
+  'Cap. respuesta':'Capacidad de respuesta', 'Compromiso con mejora continua':'Mejora continua',
+};
+
+function rangoComp(v) {
+  if (v && typeof v === 'object') {
+    let min = parseInt(v.min) || 1, max = parseInt(v.max) || min;
+    min = Math.max(1, Math.min(4, min)); max = Math.max(1, Math.min(4, max));
+    if (max < min) [min, max] = [max, min];
+    return {min, max};
+  }
+  const n = Math.max(1, Math.min(4, parseInt(v) || 3));
+  return {min:n, max:n};
+}
+function rangoTxt(r) { r = rangoComp(r); return r.min === r.max ? String(r.min) : r.min + '–' + r.max; }
+
+function requisitosPorDefecto(p) {
+  const r = [];
+  if (/secundario completo|terciario|universitario/i.test(p.formacion || '')) r.push({req:'Secundario completo', nota:''});
+  r.push({req:'Residencia en Centenario', nota:''});
+  if (/supervisor|encargado/i.test(p.puesto || '')) r.push({req:'Licencia de conducir', nota:''});
+  if (/hidrogr/i.test(p.puesto || '')) r.push({req:'Certificaciones de hidrogruista', nota:''});
+  if (/camion|chofer/i.test(p.puesto || '')) r.push({req:'Carnet de conducir profesional', nota:''});
+  r.push({req:'Antecedentes nacionales actualizados', nota:''});
+  return r;
+}
+
+function normalizarPerfil(p) {
+  const q = {...p};
+  if (typeof q.comps === 'string') { try { q.comps = JSON.parse(q.comps); } catch(e) { q.comps = {}; } }
+  if (!q.comps || typeof q.comps !== 'object') q.comps = {};
+  const comps = {};
+  Object.entries(q.comps).forEach(([k, v]) => { comps[COMP_ALIAS[k] || k] = rangoComp(v); });
+  q.comps = comps;
+  if (typeof q.requisitos === 'string') { try { q.requisitos = JSON.parse(q.requisitos); } catch(e) { q.requisitos = null; } }
+  if (!Array.isArray(q.requisitos)) q.requisitos = requisitosPorDefecto(q);
+  q.requisitos = q.requisitos.filter(r => r && r.req).map(r => ({req:String(r.req), nota:r.nota || ''}));
+  if (q.dependeDe === undefined || q.dependeDe === null) q.dependeDe = '';
+  return q;
+}
+
+// Toda competencia o requisito usado en un perfil tiene que existir en el catálogo
+function asegurarCatalogo() {
+  PERFILES_DATA.forEach(p => {
+    Object.keys(p.comps || {}).forEach(c => { if (!CAT_COMP.some(x => x.nombre === c)) CAT_COMP.push({nombre:c, grupo:'Técnicas', def:''}); });
+    (p.requisitos || []).forEach(r => { if (!CAT_REQ.some(x => x.nombre === r.req)) CAT_REQ.push({nombre:r.req, vence:false, def:''}); });
+  });
+}
+
+PERFILES_DATA.forEach((p, i) => { PERFILES_DATA[i] = normalizarPerfil(p); });
+
+// ═══════════════════════════════════════════════════════════════════════
+//  GUARDADO — "Store" en Google Sheets + copia en este navegador
+//  Cada clave guarda {ts, value}. Gana siempre la versión más nueva,
+//  así una sincronización nunca pisa algo cargado recién.
+// ═══════════════════════════════════════════════════════════════════════
+const STORE_LS = 'valpob_rrhh_store_v1';
+const STORE_KEYS = ['perfiles', 'catComp', 'catReq', 'empleados', 'externos'];
+let STORE_CLOUD_OK = null;
+
+function _lsGet() { try { return JSON.parse(localStorage.getItem(STORE_LS) || '{}') || {}; } catch(e) { return {}; } }
+function _lsSet(o) { try { localStorage.setItem(STORE_LS, JSON.stringify(o)); } catch(e) {} }
+
+async function saveStore(key, value) {
+  const ts = Date.now();
+  const all = _lsGet(); all[key] = {ts, value}; _lsSet(all);
+  if (STORE_CLOUD_OK === false) return false;
+  try {
+    const r = await postToSheets('saveStore', {key, ts, value: JSON.stringify(value)});
+    if (r && r.ok === false) throw new Error(r.error || 'error');
+    return true;
+  } catch(e) { return false; }
+}
+function savePerfiles()  { return saveStore('perfiles', PERFILES_DATA); }
+function saveEmpleados() { return saveStore('empleados', EMPLEADOS); }
+function saveExternos()  { return saveStore('externos', ORG_EXTERNOS); }
+
+function avisoGuardado(ok, txt) {
+  showToast(ok ? '✔ ' + txt + ' — guardado en Sheets' : '✔ ' + txt + ' — guardado en este navegador', false);
+}
+
+async function loadStore() {
+  const local = _lsGet();
+  let cloud = null;
+  try {
+    const res = await fetch(GS_URL + '?store=1');
+    const data = await res.json();
+    if (data && data.store && typeof data.store === 'object') { cloud = data.store; STORE_CLOUD_OK = true; }
+    else STORE_CLOUD_OK = false;
+  } catch(e) { STORE_CLOUD_OK = false; }
+  const merged = {}, aSubir = [];
+  STORE_KEYS.forEach(k => {
+    const l = local[k];
+    let c = null;
+    if (cloud && cloud[k]) {
+      try { const raw = cloud[k].value; c = {ts: Number(cloud[k].ts) || 0, value: typeof raw === 'string' ? JSON.parse(raw) : raw}; } catch(e) { c = null; }
+    }
+    if (c && (!l || c.ts >= l.ts)) { merged[k] = c; local[k] = c; }
+    else if (l) { merged[k] = l; if (STORE_CLOUD_OK) aSubir.push(k); }
+  });
+  _lsSet(local);
+  applyStore(merged);
+  actualizarBannerStore();
+  for (const k of aSubir) {
+    try { await postToSheets('saveStore', {key:k, ts:merged[k].ts, value:JSON.stringify(merged[k].value)}); } catch(e) {}
+  }
+}
+
+let PERFILES_DESDE_STORE = false;
+function applyStore(m) {
+  if (m.catComp && Array.isArray(m.catComp.value) && m.catComp.value.length) CAT_COMP = m.catComp.value;
+  if (m.catReq && Array.isArray(m.catReq.value) && m.catReq.value.length) CAT_REQ = m.catReq.value;
+  if (m.perfiles && Array.isArray(m.perfiles.value)) {
+    PERFILES_DATA.splice(0, PERFILES_DATA.length, ...m.perfiles.value.map(normalizarPerfil));
+    PERFILES_DESDE_STORE = true;
+  }
+  if (m.empleados && Array.isArray(m.empleados.value)) EMPLEADOS = m.empleados.value.map(normalizarEmpleado);
+  if (m.externos && Array.isArray(m.externos.value)) ORG_EXTERNOS = m.externos.value;
+  asegurarCatalogo();
+  rebuildPuestos();
+  refrescarTodo();
+}
+
+function actualizarBannerStore() {
+  const b = document.getElementById('storeBanner');
+  if (!b) return;
+  if (STORE_CLOUD_OK === false) {
+    b.innerHTML = '⚠ El Apps Script todavía no tiene el módulo <strong>Store</strong>: perfiles, catálogos y nómina se guardan solo en este navegador. Actualizá el script (ver instructivo) para que queden en Google Sheets y los vean todos.';
+    b.style.display = 'block';
+  } else b.style.display = 'none';
+}
+
+// PUESTOS y la tabla de desempeño por puesto siguen siempre a los perfiles
+function rebuildPuestos() {
+  PUESTOS.length = 0;
+  PERFILES_DATA.forEach(p => PUESTOS.push(p.puesto));
+  const prev = DESEMPENIO;
+  DESEMPENIO = PUESTOS.map(pu => {
+    const d = prev.find(x => x.puesto === pu);
+    const pf = PERFILES_DATA.find(x => x.puesto === pu);
+    return d ? {...d, area: d.area || (pf ? pf.area : '')} : {puesto:pu, area: pf ? pf.area : '', puntaje:null, competencias:'', estado:'Sin evaluar', obs:''};
+  });
+}
+
+function refrescarTodo() {
+  renderPerfiles(); updatePerfilKpis(); renderDesempenio(); updateKpis();
+  renderOrgTable(); drawOrganigrama(); renderNomina(); updateAreaChart();
+}
+
+function savePerfilesToStorage() { /* reemplazado por savePerfiles() */ }
+function loadPerfilesFromStorage() { /* reemplazado por loadStore() */ }
 
 let FORMACION = [...FORMACION_LOCAL];
 let DESEMPENIO = PUESTOS.map(p => {
@@ -865,6 +1294,8 @@ function showToast(msg, isError) {
 function openModal(id) {
   document.getElementById(id).classList.add('open');
   if (id === 'modalCapacitacion' || id === 'modalEficacia') populateActividadSelect(id);
+  if (id === 'modalCapacitacion') { CAP_EMP_SEL = new Set(); document.getElementById('cap-emp-buscar').value = ''; renderCapEmpList(); }
+  if (id === 'modalImport') { document.getElementById('importResultado').innerHTML = ''; }
   if (id === 'modalDesempenio') { populatePuestoSelect(); buildCompEvalGrid(); }
 }
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
@@ -911,15 +1342,33 @@ async function guardarCapacitacion() {
   const id = parseInt(document.getElementById('cap-actividad').value);
   const fecha = document.getElementById('cap-fecha').value;
   const estado = document.getElementById('cap-estado').value;
-  const asistentes = document.getElementById('cap-asistentes').value;
-  const cantidad = document.getElementById('cap-cantidad').value;
+  const otros = document.getElementById('cap-asistentes').value.trim();
+  let cantidad = document.getElementById('cap-cantidad').value;
+  const horas = document.getElementById('cap-horas').value;
   const obs = document.getElementById('cap-obs').value;
   if (!fecha) { showToast('Completá la fecha', true); return; }
   const item = FORMACION.find(f => f.id === id);
   if (!item) return;
   const mes = new Date(fecha + 'T12:00:00').getMonth() + 1;
   item.meses[mes] = estado;
-  addHistorial('capacitacion', `${item.tema} — ${estado} (${fecha})`);
+  // Asistentes de la nómina → se registra en la ficha de cada uno
+  const sel = EMPLEADOS.filter(e => CAP_EMP_SEL.has(e.id));
+  if (estado === '✔' && sel.length) {
+    sel.forEach(e => {
+      if (!e.caps.some(c => c.actId === id && c.fecha === fecha)) {
+        e.caps.push({id:uid(), fecha, actividad:item.tema, actId:id, horas: horas ? Number(horas) : '', eficacia:'Pendiente de evaluar', obs:''});
+      }
+      if (esInduccion(item.tema) && e.induccion.estado !== 'Realizada') {
+        e.induccion = {estado:'Realizada', fecha};
+        e.movimientos.push({fecha, tipo:'Inducción', detalle:'Inducción de ingreso realizada'});
+      }
+    });
+    saveEmpleados(); renderNomina();
+  }
+  const nombresSel = sel.map(nombreCompleto);
+  const asistentes = [...nombresSel, ...(otros ? otros.split(',').map(s => s.trim()).filter(Boolean) : [])].join(', ');
+  if (!cantidad) cantidad = asistentes ? String(asistentes.split(',').length) : '';
+  addHistorial('capacitacion', `${item.tema} — ${estado} (${fecha})${sel.length ? ' · ' + sel.length + ' en nómina' : ''}`);
   try {
     await postToSheets('updateFormacion', {id, mes, estado, fecha, asistentes, cantidad, obs});
     showToast('✔ Capacitación guardada en Sheets');
@@ -1051,9 +1500,12 @@ function renderPerfiles() {
   PERFILES_DATA.forEach((p,idx) => {
     const initials = p.puesto.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
     let compsHtml = Object.entries(p.comps).map(([k,v]) => {
-      let dots=''; for(let i=1;i<=4;i++) dots+=`<div class="comp-dot ${i<=v?'filled':'empty'}"></div>`;
-      return `<div class="comp-item"><div class="comp-dots">${dots}</div><span style="font-size:11px;color:var(--muted)">${k}</span></div>`;
+      const r = rangoComp(v);
+      let dots=''; for(let i=1;i<=4;i++) dots+=`<div class="comp-dot ${i<=r.min?'filled':i<=r.max?'range':'empty'}"></div>`;
+      return `<div class="comp-item" title="Nivel requerido: ${rangoTxt(r)}"><div class="comp-dots">${dots}</div><span style="font-size:11px;color:var(--muted)">${esc(k)} <strong style="color:var(--navy)">${rangoTxt(r)}</strong></span></div>`;
     }).join('');
+    const reqHtml = (p.requisitos || []).map(r => `<span class="req-chip" title="${esc(r.nota || '')}">${esc(r.req)}${r.nota ? ' · ' + esc(r.nota) : ''}</span>`).join('') || '<span style="font-size:12px;color:var(--muted)">Sin requisitos cargados</span>';
+    const dotacion = EMPLEADOS.filter(e => e.estado !== 'Baja' && e.puesto === p.puesto).length;
     grid.innerHTML += `
       <div class="perfil-card">
         <div class="perfil-head">
@@ -1066,10 +1518,16 @@ function renderPerfiles() {
           <div class="perfil-row"><span class="perfil-key">Depende de</span><span class="perfil-val">${p.dependeDe || '— nivel máximo —'}</span></div>
           <div class="perfil-row"><span class="perfil-key">Formación mín.</span><span class="perfil-val">${p.formacion}</span></div>
           <div class="perfil-row"><span class="perfil-key">Exp. mínima</span><span class="perfil-val">${p.exp}</span></div>
+          <div class="perfil-row"><span class="perfil-key">Dotación actual</span><span class="perfil-val">${dotacion} ${dotacion === 1 ? 'persona' : 'personas'}</span></div>
+          <div style="margin-top:8px;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Requisitos</div>
+          <div>${reqHtml}</div>
           ${p.responsabilidades ? `<div style="margin-top:8px;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Responsabilidades</div><div style="font-size:12px;color:var(--text);line-height:1.5">${p.responsabilidades}</div>` : ''}
           ${p.tareas ? `<div style="margin-top:8px;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Tareas habituales</div><div style="font-size:12px;color:var(--text);line-height:1.5">${p.tareas}</div>` : ''}
-          <div style="margin-top:10px;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Competencias</div>
+          <div style="margin-top:10px;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Competencias · nivel requerido</div>
           <div class="comp-grid">${compsHtml}</div>
+          <div style="text-align:right;margin-top:12px;padding-top:10px;border-top:1px solid var(--border)">
+            <button class="btn-sm" style="background:#ffebee;color:#c00000" onclick="eliminarPerfil(${idx})">🗑 Eliminar perfil</button>
+          </div>
         </div>
       </div>`;
   });
@@ -1169,7 +1627,10 @@ function updatePerfilKpis() {
   const rSub = document.getElementById('r-perfiles-sub');
   if (rSub) rSub.textContent = `de ${total} puestos`;
   const rTotal = document.getElementById('r-puestos-total');
-  if (rTotal) rTotal.textContent = total;
+  const activos = EMPLEADOS.filter(e => e.estado !== 'Baja').length;
+  if (rTotal) rTotal.textContent = activos || total;
+  const rPSub = document.getElementById('r-puestos-sub');
+  if (rPSub) rPSub.textContent = activos ? `personas en nómina · ${total} puestos` : 'puestos cubiertos';
   const totalComps = PERFILES_DATA.reduce((a,p) => a + Object.keys(p.comps).length, 0);
   document.getElementById('p-competencias').textContent = totalComps;
   const pendientes = PUESTOS.filter(p => !PERFILES_DATA.find(d => d.puesto === p));
@@ -1180,19 +1641,83 @@ function updatePerfilKpis() {
   if (evSub) evSub.textContent = `de ${DESEMPENIO.length} puestos`;
 }
 
-function agregarCompPerfil() {
-  const grid = document.getElementById('perfilCompsEditor');
-  const idx = grid.children.length;
+function compOptions(selected) {
+  let html = '<option value="">— Elegí una competencia —</option>';
+  if (selected && !CAT_COMP.some(c => c.nombre === selected)) html += `<option value="${esc(selected)}" selected>⚠ ${esc(selected)} (fuera de catálogo)</option>`;
+  const grupos = [...GRUPOS_COMP, ...new Set(CAT_COMP.map(c => c.grupo).filter(g => !GRUPOS_COMP.includes(g)))];
+  grupos.forEach(g => {
+    const items = CAT_COMP.filter(c => (c.grupo || 'Técnicas') === g);
+    if (!items.length) return;
+    html += `<optgroup label="${esc(g)}">` + items.map(c => `<option value="${esc(c.nombre)}" ${c.nombre === selected ? 'selected' : ''} title="${esc(c.def || '')}">${esc(c.nombre)}</option>`).join('') + '</optgroup>';
+  });
+  return html;
+}
+function nivelOptions(sel) { return [1,2,3,4].map(n => `<option value="${n}" ${n === sel ? 'selected' : ''}>${n} · ${NIVELES[n]}</option>`).join(''); }
+
+function agregarCompPerfil(nombre, rango) {
+  const r = rango ? rangoComp(rango) : {min:3, max:3};
   const div = document.createElement('div');
-  div.style.cssText = 'display:flex;gap:8px;align-items:center;';
+  div.className = 'comp-row';
   div.innerHTML = `
-    <input type="text" class="f-input" placeholder="Competencia" style="flex:1" id="pcomp-nombre-${idx}">
-    <select class="f-select" style="width:80px" id="pcomp-nivel-${idx}">
-      <option value="1">1</option><option value="2">2</option>
-      <option value="3" selected>3</option><option value="4">4</option>
-    </select>
-    <button class="btn-sm" style="background:#ffebee;color:#c00000;padding:5px 8px" onclick="this.parentElement.remove()">✕</button>`;
-  grid.appendChild(div);
+    <select class="f-select cr-nombre" style="flex:1;min-width:0">${compOptions(nombre || '')}</select>
+    <span class="cr-lbl">mín.</span><select class="f-select cr-min" style="width:138px;padding-right:6px">${nivelOptions(r.min)}</select>
+    <span class="cr-lbl">máx.</span><select class="f-select cr-max" style="width:138px;padding-right:6px">${nivelOptions(r.max)}</select>
+    <button class="btn-del" title="Quitar" onclick="this.parentElement.remove()">✕</button>`;
+  document.getElementById('perfilCompsEditor').appendChild(div);
+}
+
+function reqOptions(selected) {
+  let html = '<option value="">— Elegí un requisito —</option>';
+  if (selected && !CAT_REQ.some(r => r.nombre === selected)) html += `<option value="${esc(selected)}" selected>⚠ ${esc(selected)} (fuera de catálogo)</option>`;
+  html += CAT_REQ.map(r => `<option value="${esc(r.nombre)}" ${r.nombre === selected ? 'selected' : ''}>${esc(r.nombre)}</option>`).join('');
+  html += '<option value="__nuevo">+ Agregar nuevo requisito al catálogo…</option>';
+  return html;
+}
+function agregarReqPerfil(req, nota) {
+  const div = document.createElement('div');
+  div.className = 'req-row';
+  div.innerHTML = `
+    <select class="f-select rq-nombre" style="flex:1.3;min-width:0" onchange="onReqSelect(this)">${reqOptions(req || '')}</select>
+    <input type="text" class="f-input rq-nota" style="flex:1;min-width:0" placeholder="Aclaración (opcional)" value="${esc(nota || '')}">
+    <button class="btn-del" title="Quitar" onclick="this.parentElement.remove()">✕</button>`;
+  document.getElementById('perfilReqEditor').appendChild(div);
+}
+function onReqSelect(sel) {
+  if (sel.value !== '__nuevo') return;
+  const nombre = (prompt('Nombre del nuevo requisito:') || '').trim();
+  if (!nombre) { sel.value = ''; return; }
+  if (!CAT_REQ.some(r => r.nombre.toLowerCase() === nombre.toLowerCase())) {
+    const vence = confirm('¿Este requisito tiene fecha de vencimiento? (Aceptar = sí)');
+    CAT_REQ.push({nombre, vence, def:''});
+    saveStore('catReq', CAT_REQ);
+  }
+  const real = CAT_REQ.find(r => r.nombre.toLowerCase() === nombre.toLowerCase()).nombre;
+  document.querySelectorAll('#perfilReqEditor .rq-nombre').forEach(s => { const v = s === sel ? real : s.value; s.innerHTML = reqOptions(v); s.value = v; });
+}
+
+// ── ELIMINAR PERFIL ──
+async function eliminarPerfil(idx) {
+  const p = PERFILES_DATA[idx];
+  if (!p) return;
+  const hijos = PERFILES_DATA.filter(x => x.dependeDe === p.puesto);
+  const asignados = EMPLEADOS.filter(e => e.estado !== 'Baja' && e.puesto === p.puesto);
+  let msg = `¿Eliminar el perfil "${p.puesto}"?`;
+  if (hijos.length) msg += `\n\n• ${hijos.length} puesto(s) que dependen de él pasan a depender de "${p.dependeDe || 'nivel máximo'}".`;
+  if (asignados.length) msg += `\n\n⚠ Hay ${asignados.length} empleado(s) activos en este puesto: quedan "sin puesto" hasta que les asignes otro.`;
+  msg += '\n\nEsta acción no se puede deshacer.';
+  if (!confirm(msg)) return;
+  hijos.forEach(h => h.dependeDe = p.dependeDe || '');
+  let extCambio = false;
+  ORG_EXTERNOS.forEach(x => { if (x.dependeDe === p.puesto) { x.dependeDe = p.dependeDe || ''; extCambio = true; } });
+  const hoy = hoyISO();
+  asignados.forEach(e => { e.puesto = ''; e.movimientos.push({fecha:hoy, tipo:'Cambio de puesto', detalle:`Se eliminó el perfil "${p.puesto}"`}); });
+  PERFILES_DATA.splice(idx, 1);
+  rebuildPuestos();
+  refrescarTodo();
+  const ok = await savePerfiles();
+  if (asignados.length) saveEmpleados();
+  if (extCambio) saveExternos();
+  avisoGuardado(ok, 'Perfil eliminado');
 }
 
 function irAPerfilesYCrear() {
@@ -1218,6 +1743,7 @@ function openModalPerfil(editIdx) {
   document.getElementById('perfil-edit-idx').value = isEdit ? editIdx : '';
   const grid = document.getElementById('perfilCompsEditor');
   grid.innerHTML = '';
+  document.getElementById('perfilReqEditor').innerHTML = '';
   poblarSelectDepende(isEdit ? parseInt(editIdx) : null);
   if (isEdit) {
     const p = PERFILES_DATA[editIdx];
@@ -1229,16 +1755,8 @@ function openModalPerfil(editIdx) {
     document.getElementById('perfil-exp').value = p.exp;
     document.getElementById('perfil-responsabilidades').value = p.responsabilidades || '';
     document.getElementById('perfil-tareas').value = p.tareas || '';
-    Object.entries(p.comps).forEach(([k,v], i) => {
-      const div = document.createElement('div');
-      div.style.cssText = 'display:flex;gap:8px;align-items:center;';
-      div.innerHTML = `<input type="text" class="f-input" value="${k}" style="flex:1" id="pcomp-nombre-${i}">
-        <select class="f-select" style="width:80px" id="pcomp-nivel-${i}">
-          ${[1,2,3,4].map(n=>`<option value="${n}" ${n===v?'selected':''}>${n}</option>`).join('')}
-        </select>
-        <button class="btn-sm" style="background:#ffebee;color:#c00000;padding:5px 8px" onclick="this.parentElement.remove()">✕</button>`;
-      grid.appendChild(div);
-    });
+    Object.entries(p.comps).forEach(([k,v]) => agregarCompPerfil(k, v));
+    (p.requisitos || []).forEach(r => agregarReqPerfil(r.req, r.nota));
   } else {
     document.getElementById('perfil-depende').value = '';
     document.getElementById('perfil-puesto').value = '';
@@ -1248,7 +1766,9 @@ function openModalPerfil(editIdx) {
     document.getElementById('perfil-exp').value = '1 año';
     document.getElementById('perfil-responsabilidades').value = '';
     document.getElementById('perfil-tareas').value = '';
-    for (let i=0; i<3; i++) agregarCompPerfil();
+    ['Responsabilidad','Compromiso','Cumplimiento de procedimientos'].forEach(c => agregarCompPerfil(c, {min:3, max:3}));
+    agregarReqPerfil('Residencia en Centenario');
+    agregarReqPerfil('Antecedentes nacionales actualizados');
   }
   openModal('modalPerfil');
 }
@@ -1261,43 +1781,48 @@ async function guardarPerfil() {
   const formacion = document.getElementById('perfil-formacion').value;
   const exp = document.getElementById('perfil-exp').value;
   const comps = {};
-  document.getElementById('perfilCompsEditor').querySelectorAll('div').forEach((row, i) => {
-    const nombre = document.getElementById(`pcomp-nombre-${i}`)?.value.trim();
-    const nivel = parseInt(document.getElementById(`pcomp-nivel-${i}`)?.value);
-    if (nombre) comps[nombre] = nivel;
+  document.querySelectorAll('#perfilCompsEditor .comp-row').forEach(row => {
+    const nombre = row.querySelector('.cr-nombre').value;
+    if (!nombre) return;
+    comps[nombre] = rangoComp({min: row.querySelector('.cr-min').value, max: row.querySelector('.cr-max').value});
+  });
+  const requisitos = [];
+  document.querySelectorAll('#perfilReqEditor .req-row').forEach(row => {
+    const req = row.querySelector('.rq-nombre').value;
+    if (!req || req === '__nuevo' || requisitos.some(r => r.req === req)) return;
+    requisitos.push({req, nota: row.querySelector('.rq-nota').value.trim()});
   });
   const responsabilidades = document.getElementById('perfil-responsabilidades').value.trim();
   const tareas = document.getElementById('perfil-tareas').value.trim();
   let dependeDe = document.getElementById('perfil-depende').value;
   if (dependeDe === puesto) dependeDe = '';
-  const perfil = {puesto, area, tipo, formacion, exp, comps, responsabilidades, tareas, dependeDe};
   const editIdx = document.getElementById('perfil-edit-idx').value;
-  if (editIdx !== '') {
-    const anterior = PERFILES_DATA[parseInt(editIdx)];
+  const iEdit = editIdx !== '' ? parseInt(editIdx) : -1;
+  if (PERFILES_DATA.some((x, i) => i !== iEdit && x.puesto.toLowerCase() === puesto.toLowerCase())) {
+    showToast('Ya existe un perfil con ese nombre de puesto', true); return;
+  }
+  const perfil = {puesto, area, tipo, formacion, exp, comps, requisitos, responsabilidades, tareas, dependeDe};
+  let empCambio = false;
+  if (iEdit >= 0) {
+    const anterior = PERFILES_DATA[iEdit];
     if (anterior && anterior.puesto !== puesto) {
-      // si se renombró el puesto, sus dependientes siguen colgando de él
+      // si se renombró el puesto, dependientes, empleados y evaluaciones lo siguen
       PERFILES_DATA.forEach(x => { if ((x.dependeDe || '') === anterior.puesto) x.dependeDe = puesto; });
       ORG_EXTERNOS.forEach(x => { if ((x.dependeDe || '') === anterior.puesto) x.dependeDe = puesto; });
-      const iP = PUESTOS.indexOf(anterior.puesto); if (iP >= 0) PUESTOS[iP] = puesto;
+      EMPLEADOS.forEach(e => { if (e.puesto === anterior.puesto) { e.puesto = puesto; empCambio = true; } });
+      DESEMPENIO.forEach(d => { if (d.puesto === anterior.puesto) d.puesto = puesto; });
     }
-    PERFILES_DATA[parseInt(editIdx)] = perfil;
+    PERFILES_DATA[iEdit] = {...anterior, ...perfil};
   } else {
     PERFILES_DATA.push(perfil);
-    if (!PUESTOS.includes(puesto)) PUESTOS.push(puesto);
   }
-  // ── GUARDAR EN LOCALSTORAGE ──
-  savePerfilesToStorage();
-  renderPerfiles();
-  updatePerfilKpis();
-  renderOrgTable();
-  drawOrganigrama();
+  rebuildPuestos();
+  refrescarTodo();
   closeModal('modalPerfil');
-  try {
-    await postToSheets('updatePerfil', {perfil: JSON.stringify(perfil), idx: editIdx});
-    showToast('✔ Perfil guardado en Sheets');
-  } catch(e) {
-    showToast('Perfil guardado localmente', false);
-  }
+  const ok = await savePerfiles();
+  if (empCambio) saveEmpleados();
+  saveExternos();
+  avisoGuardado(ok, 'Perfil guardado');
 }
 
 // ── ALERTAS ──
@@ -1449,13 +1974,15 @@ async function syncSheets() {
     if (data.Desempenio && data.Desempenio.length) applyDesempenio(data.Desempenio);
     if (data.KPIs && data.KPIs.length) applyKpis(data.KPIs);
     if (data.Alertas && data.Alertas.length) { ALERTAS = data.Alertas; renderAlertas(); }
-    if (data.Perfiles && data.Perfiles.length) applyPerfiles(data.Perfiles);
+    if (!PERFILES_DESDE_STORE && data.Perfiles && data.Perfiles.length) applyPerfiles(data.Perfiles);
     renderFormacion(); renderDesempenio(); renderEficaciaTable(); updateKpis(); updatePerfilKpis();
     showToast('✔ Datos sincronizados');
   } catch(e) {
     document.getElementById('gsDot').classList.add('offline');
     document.getElementById('gsStatusText').textContent = 'Error de conexión';
   }
+  // Perfiles, catálogos, nómina y externos (gana la versión más nueva)
+  await loadStore();
 }
 
 function applyFormacion(rows) {
@@ -1490,14 +2017,6 @@ function applyKpis(rows) {
   });
 }
 
-function normalizarPerfil(p) {
-  const q = {...p};
-  if (typeof q.comps === 'string') { try { q.comps = JSON.parse(q.comps); } catch(e) { q.comps = {}; } }
-  if (!q.comps || typeof q.comps !== 'object') q.comps = {};
-  if (q.dependeDe === undefined || q.dependeDe === null) q.dependeDe = '';
-  return q;
-}
-
 function applyPerfiles(rows) {
   rows.forEach(raw => {
     const p = normalizarPerfil(raw);
@@ -1520,11 +2039,7 @@ function buildCharts() {
   if (chartsBuilt) return; chartsBuilt = true;
   const mesData = [0,1,4,6,8,4,4,5,5,4,3,1];
   const realizadasData = MONTHS.map((_,i) => FORMACION.reduce((a,f)=>a+(f.meses[i+1]==='✔'?1:0),0));
-  const aColors = ['#1F3864','#2F5496','#4FA8D8','#375623','#B87333','#BDD7EE','#5a6680'];
-  const areaLabels = ['Gerencia','S&H','Téc/Op','SGC','RRHH','Compras','Contab.'];
-  new Chart(document.getElementById('chartAreas'),{type:'doughnut',data:{labels:areaLabels,datasets:[{data:[2,2,2,1,1,2,1],backgroundColor:aColors,borderWidth:2,borderColor:'#fff'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}});
-  const leg = document.getElementById('legendAreas');
-  areaLabels.forEach((l,i) => { leg.innerHTML+=`<span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:2px;background:${aColors[i]}"></span>${l}</span>`; });
+  updateAreaChart();
   new Chart(document.getElementById('chartFormMes'),{type:'bar',data:{labels:MONTHS,datasets:[{label:'Actividades',data:mesData,backgroundColor:'#2F5496',borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1}}}}});
   new Chart(document.getElementById('chartKpiForm'),{type:'bar',data:{labels:MONTHS,datasets:[{label:'Planificadas',data:mesData,backgroundColor:'rgba(47,84,150,.25)',borderRadius:4},{label:'Realizadas',data:realizadasData,backgroundColor:'#375623',borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,scales:{y:{beginAtZero:true,ticks:{stepSize:1}}},plugins:{legend:{display:false}}}});
   new Chart(document.getElementById('chartCategoria'),{type:'bar',data:{labels:['SGC / Calidad','Seguridad & Higiene','Habilidades'],datasets:[{data:[10,14,7],backgroundColor:['#2F5496','#375623','#B87333'],borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{beginAtZero:true}}}});
@@ -1584,10 +2099,7 @@ async function cambiarDependencia(perfilIdx, nuevoPadre) {
   }
   p.dependeDe = nuevoPadre;
   renderOrgTable(); drawOrganigrama(); renderPerfiles();
-  try {
-    await postToSheets('updatePerfil', {perfil: JSON.stringify(p), idx: String(perfilIdx)});
-    showToast('✔ Organigrama actualizado y guardado');
-  } catch(e) { showToast('Organigrama actualizado (sin sincronizar)', false); }
+  avisoGuardado(await savePerfiles(), 'Organigrama actualizado');
 }
 
 function renderOrgTable() {
@@ -1617,6 +2129,7 @@ function renderOrgTable() {
       <td style="white-space:nowrap">
         <button class="btn-sm btn-cargar" title="Editar perfil" onclick="openModalPerfil(${n.perfilIdx})">✏️ Perfil</button>
         <button class="btn-sm" style="background:#EEF2FF;color:#1F3864;margin-left:4px" title="Descargar perfil en PDF" onclick="descargarPerfilPDF(${n.perfilIdx})">PDF</button>
+        <button class="btn-sm" style="background:#ffebee;color:#c00000;margin-left:4px" title="Eliminar perfil" onclick="eliminarPerfil(${n.perfilIdx})">🗑</button>
       </td>
     </tr>`;
   });
@@ -1681,16 +2194,35 @@ function guardarOrgPuesto() {
   else ORG_EXTERNOS.push({puesto, dependeDe, area});
   closeModal('modalOrgPuesto');
   renderOrgTable(); drawOrganigrama();
-  showToast('✔ Organigrama actualizado');
+  saveExternos().then(ok => avisoGuardado(ok, 'Organigrama actualizado'));
 }
 
 function eliminarOrgExterno(idx) {
   if (!confirm('¿Eliminar ' + ORG_EXTERNOS[idx].puesto + ' del organigrama?')) return;
   ORG_EXTERNOS.splice(idx, 1);
   renderOrgTable(); drawOrganigrama();
+  saveExternos();
 }
 
 // ── DIBUJO SVG — layout de árbol (cada puesto cuelga debajo de su superior) ──
+// Modo "funcional": cajas de puesto. Modo "nominal": cada caja lista a las personas activas de la nómina.
+let ORG_MODO = 'funcional';
+
+function setOrgModo(m) {
+  ORG_MODO = m;
+  document.getElementById('orgModoF').classList.toggle('active', m === 'funcional');
+  document.getElementById('orgModoN').classList.toggle('active', m === 'nominal');
+  document.getElementById('org-modo-nota').textContent = m === 'nominal'
+    ? 'Nominal — se arma con la nómina de empleados activos'
+    : 'Funcional — se arma con los perfiles de puesto';
+  drawOrganigrama();
+}
+
+function personasDePuesto(puesto) {
+  return EMPLEADOS.filter(e => e.estado !== 'Baja' && e.puesto === puesto)
+    .sort((a, b) => nombreCompleto(a).localeCompare(nombreCompleto(b), 'es'));
+}
+
 function drawOrganigrama() {
   sincronizarOrganigrama();
   const svg = document.getElementById('orgContent');
@@ -1714,10 +2246,21 @@ function drawOrganigrama() {
     return lineas;
   }
 
-  const W = 152, H = 44, HGAP = 14, VGAP = 74, PAD = 20;
+  const nominal = ORG_MODO === 'nominal';
+  const W = nominal ? 184 : 152, HGAP = 14, GAPV = 30, PAD = 20, MAXN = 10;
   const internos = ORG_PUESTOS.filter(p => p.tipo === 'interno');
   const externos = ORG_PUESTOS.filter(p => p.tipo === 'externo');
   const hijosDe = id => internos.filter(x => x.dependeDe === id && x.id !== id);
+
+  // Personal sin puesto (sólo en modo nominal)
+  const sinPuestoDiv = document.getElementById('orgSinPuesto');
+  if (sinPuestoDiv) {
+    const puestosOk = new Set(PERFILES_DATA.map(p => p.puesto));
+    const sp = EMPLEADOS.filter(e => e.estado !== 'Baja' && !puestosOk.has(e.puesto));
+    sinPuestoDiv.innerHTML = nominal && sp.length
+      ? `<div class="card" style="margin-top:12px;border-left:3px solid #f4a228"><div class="card-title" style="margin-bottom:8px">⚠ Personal sin puesto asignado (${sp.length}) — no aparece en el organigrama</div><div style="font-size:12.5px;color:var(--muted)">${sp.map(e => `<a href="#" onclick="verFicha('${e.id}');return false" style="color:var(--blue)">${esc(nombreCompleto(e))}</a>`).join(' · ')}</div></div>`
+      : '';
+  }
 
   if (!internos.length) {
     document.getElementById('orgSVG').setAttribute('viewBox', '0 0 900 120');
@@ -1727,6 +2270,21 @@ function drawOrganigrama() {
     return;
   }
 
+  // Contenido y alto de cada caja
+  const caja = {};
+  internos.forEach(n => {
+    const lineas = partir(n.puesto, nominal ? 26 : 22);
+    let nombres = [], todos = [];
+    if (nominal) {
+      todos = personasDePuesto(n.puesto).map(nombreCompleto);
+      if (!todos.length) nombres = ['Vacante'];
+      else if (todos.length > MAXN) nombres = [...todos.slice(0, MAXN - 1), `+ ${todos.length - (MAXN - 1)} más`];
+      else nombres = todos;
+    }
+    const h = nominal ? 22 + lineas.length * 12 + nombres.length * 11.5 + 8 : 44;
+    caja[n.id] = {lineas, nombres, todos, h};
+  });
+
   // Raíces: sin superior, o con un superior inexistente
   const ids = new Set(internos.map(x => x.id));
   const raices = internos.filter(p => !p.dependeDe || !ids.has(p.dependeDe));
@@ -1735,26 +2293,34 @@ function drawOrganigrama() {
   raices.forEach(r => marcar(r, 0));
   internos.forEach(n => { if (!vistos.has(n.id)) { raices.push(n); marcar(n, 0); } }); // ciclos → se muestran igual
 
-  // Layout: las hojas se acomodan de izquierda a derecha, cada padre se centra sobre sus hijos
+  // Layout horizontal: hojas de izquierda a derecha, cada padre centrado sobre sus hijos
   const pos = {};
   let cursorX = PAD;
   function layout(n, depth, g) {
-    const y = PAD + depth * VGAP;
     const hijos = g > 60 ? [] : hijosDe(n.id).filter(h => !pos[h.id]);
     if (!hijos.length) {
-      pos[n.id] = {x: cursorX, y, d: depth};
+      pos[n.id] = {x: cursorX, d: depth};
       cursorX += W + HGAP;
       return pos[n.id].x;
     }
-    pos[n.id] = {x: 0, y, d: depth};
+    pos[n.id] = {x: 0, d: depth};
     const xs = hijos.map(h => layout(h, depth + 1, g + 1));
     pos[n.id].x = (xs[0] + xs[xs.length-1]) / 2;
     return pos[n.id].x;
   }
   raices.forEach(r => { layout(r, 0, 0); cursorX += HGAP; });
 
+  // Layout vertical: cada nivel tan alto como su caja más alta
+  const levelH = {};
+  Object.entries(pos).forEach(([id, p]) => { levelH[p.d] = Math.max(levelH[p.d] || 0, caja[id].h); });
+  const maxD = Math.max(...Object.values(pos).map(p => p.d));
+  const levelY = {};
+  let yAcum = PAD;
+  for (let d = 0; d <= maxD + 1; d++) { levelY[d] = yAcum; yAcum += (levelH[d] || 44) + GAPV; }
+  Object.values(pos).forEach(p => { p.y = levelY[p.d]; });
+
   const maxX = Math.max(...Object.values(pos).map(p => p.x));
-  const maxY = Math.max(...Object.values(pos).map(p => p.y));
+  const maxBottom = Math.max(...Object.entries(pos).map(([id, p]) => p.y + caja[id].h));
   const svgW = Math.max(900, maxX + W + PAD);
   const offset = svgW > maxX + W + PAD ? (svgW - (maxX + W + PAD)) / 2 : 0;
   Object.values(pos).forEach(p => p.x += offset);
@@ -1764,15 +2330,12 @@ function drawOrganigrama() {
     const hijos = hijosDe(p.id).filter(h => pos[h.id]);
     const from = pos[p.id];
     if (!from || !hijos.length) return;
-    const x1 = from.x + W/2, y1 = from.y + H;
-    const mid = y1 + (VGAP - H) / 2;
+    const x1 = from.x + W/2, y1 = from.y + caja[p.id].h;
+    const mid = levelY[from.d + 1] - GAPV / 2;
     svg.appendChild(el('path', {d:`M${x1},${y1} L${x1},${mid}`, stroke:'#1F3864', 'stroke-width':'1.3', fill:'none'}));
     hijos.forEach(h => {
       const x2 = pos[h.id].x + W/2, y2 = pos[h.id].y;
-      svg.appendChild(el('path', {
-        d:`M${x1},${mid} L${x2},${mid} L${x2},${y2}`,
-        stroke:'#1F3864', 'stroke-width':'1.3', fill:'none'
-      }));
+      svg.appendChild(el('path', {d:`M${x1},${mid} L${x2},${mid} L${x2},${y2}`, stroke:'#1F3864', 'stroke-width':'1.3', fill:'none'}));
     });
   });
 
@@ -1780,37 +2343,49 @@ function drawOrganigrama() {
   internos.forEach(p => {
     const c = pos[p.id];
     if (!c) return;
+    const k = caja[p.id];
     const raiz = c.d === 0, segundo = c.d === 1;
     const fill   = raiz ? '#1F3864' : segundo ? '#F4C75A' : '#FEF3C0';
     const stroke = raiz ? '#12203c' : segundo ? '#BA7517' : '#B45309';
     const color  = raiz ? '#ffffff' : '#1a2540';
     const g = el('g', {});
-    g.appendChild(el('rect', {x:c.x, y:c.y, width:W, height:H, rx:'6', fill, stroke, 'stroke-width': raiz ? '1.4' : '1'}));
+    g.appendChild(el('rect', {x:c.x, y:c.y, width:W, height:k.h, rx:'6', fill, stroke, 'stroke-width': raiz ? '1.4' : '1'}));
 
-    const lineas = partir(p.puesto, 22);
-    const dosLineas = lineas.length > 1;
-    const baseY = p.area ? (dosLineas ? 15 : 19) : (dosLineas ? 18 : H/2 + 4);
-    lineas.forEach((ln, i) => {
-      const t = el('text', {
-        x: c.x + W/2,
-        y: c.y + baseY + i*11.5,
-        'text-anchor':'middle', 'font-family':'DM Sans,sans-serif',
-        'font-size': raiz ? '12' : '11.5', 'font-weight': raiz || segundo ? '600' : '500', fill: color
+    if (!nominal) {
+      const dosLineas = k.lineas.length > 1;
+      const baseY = p.area ? (dosLineas ? 15 : 19) : (dosLineas ? 18 : 44/2 + 4);
+      k.lineas.forEach((ln, i) => {
+        const t = el('text', {x:c.x + W/2, y:c.y + baseY + i*11.5, 'text-anchor':'middle', 'font-family':'DM Sans,sans-serif',
+          'font-size': raiz ? '12' : '11.5', 'font-weight': raiz || segundo ? '600' : '500', fill: color});
+        t.textContent = ln; g.appendChild(t);
       });
-      t.textContent = ln;
-      g.appendChild(t);
-    });
-    if (p.area) {
-      const a = el('text', {
-        x: c.x + W/2, y: c.y + H - 7,
-        'text-anchor':'middle', 'font-family':'DM Sans,sans-serif',
-        'font-size':'8.5', fill: raiz ? '#BDD7EE' : '#7a5a1a'
+      if (p.area) {
+        const a = el('text', {x:c.x + W/2, y:c.y + 44 - 7, 'text-anchor':'middle', 'font-family':'DM Sans,sans-serif', 'font-size':'8.5', fill: raiz ? '#BDD7EE' : '#7a5a1a'});
+        a.textContent = p.area; g.appendChild(a);
+      }
+    } else {
+      const L = k.lineas.length;
+      k.lineas.forEach((ln, i) => {
+        const t = el('text', {x:c.x + W/2, y:c.y + 16 + i*12, 'text-anchor':'middle', 'font-family':'DM Sans,sans-serif',
+          'font-size':'11.5', 'font-weight':'600', fill: color});
+        t.textContent = ln; g.appendChild(t);
       });
-      a.textContent = p.area;
-      g.appendChild(a);
+      const sub = el('text', {x:c.x + W/2, y:c.y + 16 + L*12, 'text-anchor':'middle', 'font-family':'DM Sans,sans-serif', 'font-size':'8.5', fill: raiz ? '#BDD7EE' : '#7a5a1a'});
+      sub.textContent = (p.area ? p.area + ' · ' : '') + k.todos.length + (k.todos.length === 1 ? ' persona' : ' personas');
+      g.appendChild(sub);
+      const sepY = c.y + 22 + L*12;
+      g.appendChild(el('line', {x1:c.x + 10, y1:sepY, x2:c.x + W - 10, y2:sepY, stroke: raiz ? 'rgba(255,255,255,.35)' : '#D9B25A', 'stroke-width':'0.8'}));
+      k.nombres.forEach((nm, j) => {
+        const vacante = nm === 'Vacante' && !k.todos.length;
+        const txt = nm.length > 30 ? nm.slice(0, 29) + '…' : nm;
+        const t = el('text', {x:c.x + W/2, y:sepY + 12 + j*11.5, 'text-anchor':'middle', 'font-family':'DM Sans,sans-serif',
+          'font-size':'9.5', 'font-style': vacante ? 'italic' : 'normal', fill: vacante ? (raiz ? '#BDD7EE' : '#9a7b3f') : color});
+        t.textContent = txt; g.appendChild(t);
+      });
     }
     const tip = el('title', {});
-    tip.textContent = p.puesto + (p.area ? ' · ' + p.area : '') + ' — doble clic para editar el perfil';
+    tip.textContent = p.puesto + (p.area ? ' · ' + p.area : '') +
+      (nominal ? (k.todos.length ? '\n' + k.todos.join('\n') : '\nVacante') : '') + '\n(doble clic para editar el perfil)';
     g.appendChild(tip);
     g.style.cursor = 'pointer';
     g.addEventListener('dblclick', () => openModalPerfil(p.perfilIdx));
@@ -1818,7 +2393,7 @@ function drawOrganigrama() {
   });
 
   // Asesores externos — fila al pie, con vínculo punteado a su referente
-  const bottomY = maxY + H + VGAP - 14;
+  const bottomY = maxBottom + 60;
   const extW = 140, extH = 40;
   const extTotal = externos.length * extW + Math.max(0, externos.length-1) * HGAP;
   const extStartX = Math.max(PAD, (svgW - extTotal) / 2);
@@ -1828,9 +2403,9 @@ function drawOrganigrama() {
     const from = p.dependeDe ? pos[p.dependeDe] : null;
     if (from) {
       // se rutea por el pasillo lateral para no cruzar las cajas del árbol
-      const x1 = from.x + W/2, y1 = from.y + H;
+      const x1 = from.x + W/2, y1 = from.y + caja[p.dependeDe].h;
       const x2 = ex + extW/2, y2 = ey;
-      const bajada = y1 + (VGAP - H) / 2 + 4;
+      const bajada = y1 + GAPV / 2 + 4;
       const canal = y2 - 18;
       const pasillo = (x1 < svgW/2) ? 9 : svgW - 9;
       svg.appendChild(el('path', {
@@ -1842,12 +2417,9 @@ function drawOrganigrama() {
     g.appendChild(el('rect', {x:ex, y:ey, width:extW, height:extH, rx:'6', fill:'#F3F4F6', stroke:'#9CA3AF', 'stroke-width':'1', 'stroke-dasharray':'4 3'}));
     const lineas = partir(p.puesto, 21);
     lineas.forEach((ln, j) => {
-      const t = el('text', {
-        x: ex + extW/2, y: ey + (lineas.length === 1 ? extH/2 - 1 : 15 + j*11),
-        'text-anchor':'middle', 'font-family':'DM Sans,sans-serif', 'font-size':'10', fill:'#6B7280'
-      });
-      t.textContent = ln;
-      g.appendChild(t);
+      const t = el('text', {x: ex + extW/2, y: ey + (lineas.length === 1 ? extH/2 - 1 : 15 + j*11),
+        'text-anchor':'middle', 'font-family':'DM Sans,sans-serif', 'font-size':'10', fill:'#6B7280'});
+      t.textContent = ln; g.appendChild(t);
     });
     const a = el('text', {x: ex + extW/2, y: ey + extH - 7, 'text-anchor':'middle', 'font-family':'DM Sans,sans-serif', 'font-size':'8', fill:'#9CA3AF'});
     a.textContent = p.area || 'Externo';
@@ -1857,7 +2429,7 @@ function drawOrganigrama() {
     svg.appendChild(g);
   });
 
-  const totalH = (externos.length ? bottomY + extH : maxY + H) + PAD;
+  const totalH = (externos.length ? bottomY + extH : maxBottom) + PAD;
   document.getElementById('orgSVG').setAttribute('viewBox', `0 0 ${svgW} ${totalH}`);
 }
 
@@ -1868,7 +2440,7 @@ function exportOrgSVG() {
   const blob = new Blob([svgStr], {type:'image/svg+xml'});
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = 'Organigrama_VALPOB_Rev03.svg';
+  a.download = (ORG_MODO === 'nominal' ? 'Organigrama_Nominal_VALPOB_' + _slug(_fechaHoy()) : 'Organigrama_Funcional_VALPOB_Rev03') + '.svg';
   a.click();
 }
 
@@ -1968,25 +2540,30 @@ function _pdfPerfil(doc, p) {
 
   if (p.responsabilidades) { rotulo('Responsabilidades'); parrafo(p.responsabilidades); }
   if (p.tareas)            { rotulo('Tareas habituales'); parrafo(p.tareas); }
+  if ((p.requisitos || []).length) {
+    rotulo('Requisitos del puesto');
+    p.requisitos.forEach(r => parrafo('•  ' + r.req + (r.nota ? ' — ' + r.nota : '')));
+  }
 
   // ── Competencias: mismo esquema de 4 puntitos que la ficha ──
   const comps = Object.entries(p.comps || {});
   if (comps.length) {
-    rotulo('Competencias');
+    rotulo('Competencias · nivel requerido (1 Básico · 2 Intermedio · 3 Avanzado · 4 Experto)');
     const colW = CW/2, rowH = 7.2, dot = 2.6, gap = 1;
-    comps.forEach(([nombre, nivel], i) => {
+    comps.forEach(([nombre, nivelRaw], i) => {
+      const r = rangoComp(nivelRaw);
       const col = i % 2, f = Math.floor(i/2);
       if (col === 0) espacio(rowH + 1);
       const x = M + col*colW;
       const yy = y + f*rowH;
       for (let n = 1; n <= 4; n++) {
         const bx = x + (n-1)*(dot+gap);
-        if (n <= nivel) doc.setFillColor(79,168,216); else doc.setFillColor(221,227,237);
+        if (n <= r.min) doc.setFillColor(79,168,216); else if (n <= r.max) doc.setFillColor(169,213,238); else doc.setFillColor(221,227,237);
         doc.roundedRect(bx, yy - 2.2, dot, dot, .6, .6, 'F');
       }
       const nombreX = x + 4*(dot+gap) + 2.4;
       const maxW = colW - (nombreX - x) - 4;
-      let nom = String(nombre), fs = 8.4;
+      let nom = String(nombre) + ' (' + rangoTxt(r) + ')', fs = 8.4;
       doc.setFont('helvetica','normal'); doc.setFontSize(fs); doc.setTextColor(90,102,128);
       while (doc.getTextWidth(nom) > maxW && fs > 6.4) { fs -= 0.3; doc.setFontSize(fs); }
       while (doc.getTextWidth(nom) > maxW && nom.length > 6) nom = nom.slice(0, -2);
@@ -2035,12 +2612,810 @@ function descargarTodosPerfilesPDF() {
   showToast('✔ PDF generado con ' + PERFILES_DATA.length + ' perfiles');
 }
 
+// ═══════════════════════════════════════════════════════════════════════
+//  NÓMINA Y FICHA DE EMPLEADO
+// ═══════════════════════════════════════════════════════════════════════
+let EMPLEADOS = [];
+let FICHA_ID = null;
+let CAP_EMP_SEL = new Set();
+let fichaChart = null;
+const ANIO = new Date().getFullYear();
+
+function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+function norm(s) { return String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim(); }
+function hoyISO() { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); }
+function fmtF(iso) { if (!iso) return '—'; const m = String(iso).match(/^(\d{4})-(\d{2})-(\d{2})/); return m ? `${m[3]}/${m[2]}/${m[1]}` : iso; }
+function anioDe(iso) { const m = String(iso || '').match(/^(\d{4})/); return m ? parseInt(m[1]) : null; }
+function esInduccion(tema) { return /inducci/i.test(tema || ''); }
+function nombreCompleto(e) { return (e.apellido || '') + (e.nombre ? ', ' + e.nombre : ''); }
+function perfilDe(e) { return PERFILES_DATA.find(p => p.puesto === e.puesto); }
+function antiguedad(desde, hasta) {
+  if (!desde) return '—';
+  const a = new Date(desde + 'T12:00:00'), b = hasta ? new Date(hasta + 'T12:00:00') : new Date();
+  let meses = (b.getFullYear() - a.getFullYear()) * 12 + (b.getMonth() - a.getMonth());
+  if (b.getDate() < a.getDate()) meses--;
+  if (meses < 0) return '—';
+  const y = Math.floor(meses / 12), m = meses % 12;
+  return y ? `${y} a${m ? ' ' + m + ' m' : ''}` : `${m} m`;
+}
+
+function normalizarEmpleado(e) {
+  const q = {...e};
+  q.id = q.id || uid();
+  q.estado = q.estado === 'Baja' ? 'Baja' : 'Activo';
+  q.induccion = q.induccion && typeof q.induccion === 'object' ? q.induccion : {estado:'Pendiente', fecha:''};
+  q.requisitos = q.requisitos && typeof q.requisitos === 'object' ? q.requisitos : {};
+  q.caps = Array.isArray(q.caps) ? q.caps : [];
+  q.evals = Array.isArray(q.evals) ? q.evals : [];
+  q.movimientos = Array.isArray(q.movimientos) ? q.movimientos : [];
+  ['legajo','dni','apellido','nombre','puesto','fechaIngreso','fechaBaja','motivoBaja','obs'].forEach(k => { if (q[k] == null) q[k] = ''; });
+  return q;
+}
+
+// Requisitos del puesto vs. lo presentado por el empleado
+function estadoRequisitos(e) {
+  const p = perfilDe(e);
+  const reqs = p ? (p.requisitos || []) : [];
+  const hoy = hoyISO();
+  const en30 = new Date(Date.now() + 30*86400000).toISOString().slice(0, 10);
+  let ok = 0, vencidos = 0, porVencer = 0;
+  const filas = reqs.map((r, i) => {
+    const cat = CAT_REQ.find(c => c.nombre === r.req) || {vence:false};
+    const st = e.requisitos[r.req] || {};
+    let res = 'falta';
+    if (st.estado === 'Cumple') {
+      if (cat.vence && st.vence && st.vence < hoy) { res = 'vencido'; vencidos++; }
+      else { res = 'ok'; ok++; if (cat.vence && st.vence && st.vence <= en30) porVencer++; }
+    } else if (st.estado === 'En trámite') res = 'tramite';
+    return {i, req:r.req, nota:r.nota, vence:cat.vence, st, res};
+  });
+  return {filas, total: reqs.length, ok, vencidos, porVencer};
+}
+
+function ultimaEval(e) {
+  return [...e.evals].sort((a, b) => (a.anio - b.anio) || String(a.fecha).localeCompare(String(b.fecha))).pop() || null;
+}
+
+// ── LISTADO ──
+function renderNomina() {
+  const tb = document.getElementById('nominaTbody');
+  if (!tb) return;
+  document.querySelectorAll('.n-anio').forEach(s => s.textContent = ANIO);
+  const selP = document.getElementById('nomPuesto');
+  const prevP = selP.value;
+  selP.innerHTML = '<option value="">Todos los puestos</option><option value="__sin">⚠ Sin puesto asignado</option>' +
+    PERFILES_DATA.map(p => `<option value="${esc(p.puesto)}">${esc(p.puesto)}</option>`).join('');
+  selP.value = prevP;
+  if (selP.value !== prevP) selP.value = '';
+
+  const activos = EMPLEADOS.filter(e => e.estado !== 'Baja');
+  const puestosOk = new Set(PERFILES_DATA.map(p => p.puesto));
+  document.getElementById('n-activos').textContent = activos.length;
+  document.getElementById('n-ingresos').textContent = EMPLEADOS.filter(e => anioDe(e.fechaIngreso) === ANIO).length;
+  document.getElementById('n-bajas').textContent = EMPLEADOS.filter(e => e.estado === 'Baja' && anioDe(e.fechaBaja) === ANIO).length;
+  document.getElementById('n-induccion').textContent = activos.filter(e => e.induccion.estado !== 'Realizada').length;
+  const evaluados = activos.filter(e => e.evals.some(v => v.anio === ANIO)).length;
+  document.getElementById('n-evaluados').textContent = activos.length ? Math.round(evaluados / activos.length * 100) + '%' : '—';
+  document.getElementById('n-evaluados-sub').textContent = `${evaluados} de ${activos.length} activos`;
+  document.getElementById('n-req').textContent = activos.filter(e => { const r = estadoRequisitos(e); return r.ok < r.total; }).length;
+
+  const q = norm(document.getElementById('nomBuscar').value);
+  const fp = selP.value, fe = document.getElementById('nomEstado').value;
+  let lista = EMPLEADOS.filter(e => {
+    if (fe && e.estado !== fe) return false;
+    if (fp === '__sin' && puestosOk.has(e.puesto)) return false;
+    if (fp && fp !== '__sin' && e.puesto !== fp) return false;
+    if (q && !norm(nombreCompleto(e) + ' ' + e.dni + ' ' + e.legajo).includes(q)) return false;
+    return true;
+  }).sort((a, b) => nombreCompleto(a).localeCompare(nombreCompleto(b), 'es'));
+
+  if (!EMPLEADOS.length) {
+    tb.innerHTML = `<tr><td colspan="11" class="empty-row">Todavía no hay empleados cargados. Usá <strong>+ Alta de empleado</strong> o <strong>⬆ Importar desde Excel</strong> para pegar la nómina completa.</td></tr>`;
+    return;
+  }
+  if (!lista.length) { tb.innerHTML = `<tr><td colspan="11" class="empty-row">Ningún empleado coincide con el filtro.</td></tr>`; return; }
+
+  tb.innerHTML = lista.map(e => {
+    const p = perfilDe(e);
+    const rq = estadoRequisitos(e);
+    const rqBadge = !rq.total ? '<span class="badge badge-gray">—</span>'
+      : rq.vencidos ? `<span class="badge badge-red">${rq.ok}/${rq.total} · vencido</span>`
+      : rq.ok === rq.total ? `<span class="badge badge-ok">${rq.ok}/${rq.total}${rq.porVencer ? ' · por vencer' : ''}</span>`
+      : `<span class="badge badge-pend">${rq.ok}/${rq.total}</span>`;
+    const capsA = e.caps.filter(c => anioDe(c.fecha) === ANIO).length;
+    const ue = ultimaEval(e);
+    const evHtml = ue ? `<div style="display:flex;align-items:center;gap:6px;justify-content:center"><div class="score-circle score-${ue.puntaje}" style="width:26px;height:26px;font-size:12px">${ue.puntaje}</div><span style="font-size:11px;color:var(--muted)">${ue.anio}</span></div>` : '<div style="text-align:center;color:var(--muted)">—</div>';
+    const ind = e.induccion.estado === 'Realizada' ? `<span class="badge badge-ok">✔ ${fmtF(e.induccion.fecha)}</span>` : '<span class="badge badge-pend">Pendiente</span>';
+    const est = e.estado === 'Baja' ? `<span class="badge badge-red" title="${esc(e.motivoBaja)}">Baja ${fmtF(e.fechaBaja)}</span>` : '<span class="badge badge-ok">Activo</span>';
+    const puestoHtml = p ? `<strong style="color:var(--navy);font-weight:500">${esc(e.puesto)}</strong><div style="font-size:11px;color:var(--muted)">${esc(p.area)}</div>`
+      : `<span class="badge badge-pend">⚠ Sin puesto</span>${e.puesto ? `<div style="font-size:11px;color:var(--muted)">${esc(e.puesto)}</div>` : ''}`;
+    return `<tr>
+      <td style="color:var(--muted);font-family:'DM Mono',monospace;font-size:12px">${esc(e.legajo) || '—'}</td>
+      <td><a href="#" onclick="verFicha('${e.id}');return false" style="color:var(--navy);font-weight:500;text-decoration:none">${esc(nombreCompleto(e))}</a>${e.dni ? `<div style="font-size:11px;color:var(--muted)">DNI ${esc(e.dni)}</div>` : ''}</td>
+      <td>${puestoHtml}</td>
+      <td style="white-space:nowrap">${fmtF(e.fechaIngreso)}</td>
+      <td style="white-space:nowrap;color:var(--muted)">${antiguedad(e.fechaIngreso, e.estado === 'Baja' ? e.fechaBaja : null)}</td>
+      <td>${ind}</td>
+      <td>${rqBadge}</td>
+      <td style="text-align:center">${capsA}</td>
+      <td>${evHtml}</td>
+      <td>${est}</td>
+      <td style="white-space:nowrap">
+        <button class="btn-sm btn-cargar" onclick="verFicha('${e.id}')">Ficha</button>
+        <button class="btn-sm" style="background:#f0e6ff;color:#6a1b9a" title="Modificar" onclick="abrirModalEmpleado('${e.id}')">✏️</button>
+        ${e.estado === 'Baja'
+          ? `<button class="btn-sm btn-eval" title="Reactivar" onclick="reactivarEmpleado('${e.id}')">↺</button>`
+          : `<button class="btn-sm btn-eficacia" title="Dar de baja" onclick="abrirBaja('${e.id}')">Baja</button>`}
+        <button class="btn-sm" style="background:#ffebee;color:#c00000" title="Eliminar (sólo para errores de carga)" onclick="eliminarEmpleado('${e.id}')">🗑</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+// ── ALTA / MODIFICACIÓN ──
+function abrirModalEmpleado(id) {
+  const e = id ? EMPLEADOS.find(x => x.id === id) : null;
+  document.getElementById('empTitulo').textContent = e ? '✏️ Modificar empleado' : '+ Alta de empleado';
+  document.getElementById('emp-id').value = e ? e.id : '';
+  const sel = document.getElementById('emp-puesto');
+  sel.innerHTML = '<option value="">— Elegí el puesto —</option>' + PERFILES_DATA.map(p => `<option value="${esc(p.puesto)}">${esc(p.puesto)}</option>`).join('');
+  document.getElementById('emp-legajo').value = e ? e.legajo : '';
+  document.getElementById('emp-dni').value = e ? e.dni : '';
+  document.getElementById('emp-apellido').value = e ? e.apellido : '';
+  document.getElementById('emp-nombre').value = e ? e.nombre : '';
+  sel.value = e && PERFILES_DATA.some(p => p.puesto === e.puesto) ? e.puesto : '';
+  document.getElementById('emp-ingreso').value = e ? e.fechaIngreso : hoyISO();
+  document.getElementById('emp-ind-estado').value = e ? e.induccion.estado : 'Pendiente';
+  document.getElementById('emp-ind-fecha').value = e ? (e.induccion.fecha || '') : '';
+  document.getElementById('emp-obs').value = e ? e.obs : '';
+  infoPuestoEmp();
+  openModal('modalEmpleado');
+}
+function infoPuestoEmp() {
+  const p = PERFILES_DATA.find(x => x.puesto === document.getElementById('emp-puesto').value);
+  document.getElementById('emp-puesto-info').innerHTML = p
+    ? `Área: <strong>${esc(p.area)}</strong> · Reporta a: <strong>${esc(p.dependeDe || 'nivel máximo')}</strong>${(p.requisitos || []).length ? ' · Requisitos: ' + p.requisitos.map(r => esc(r.req)).join(', ') : ''}`
+    : '';
+}
+async function guardarEmpleado() {
+  const id = document.getElementById('emp-id').value;
+  const datos = {
+    legajo: document.getElementById('emp-legajo').value.trim(),
+    dni: document.getElementById('emp-dni').value.replace(/\D/g, ''),
+    apellido: document.getElementById('emp-apellido').value.trim(),
+    nombre: document.getElementById('emp-nombre').value.trim(),
+    puesto: document.getElementById('emp-puesto').value,
+    fechaIngreso: document.getElementById('emp-ingreso').value,
+    obs: document.getElementById('emp-obs').value.trim(),
+  };
+  const ind = {estado: document.getElementById('emp-ind-estado').value, fecha: document.getElementById('emp-ind-fecha').value};
+  if (!datos.apellido || !datos.nombre) { showToast('Completá apellido y nombre', true); return; }
+  if (!datos.puesto) { showToast('Elegí el puesto', true); return; }
+  if (!datos.fechaIngreso) { showToast('Completá la fecha de ingreso', true); return; }
+  if (ind.estado === 'Realizada' && !ind.fecha) { showToast('Indicá la fecha de la inducción', true); return; }
+  const dup = EMPLEADOS.find(x => x.id !== id && ((datos.dni && x.dni === datos.dni) || (datos.legajo && x.legajo === datos.legajo)));
+  if (dup && !confirm(`Ya existe ${nombreCompleto(dup)} con el mismo ${datos.dni && dup.dni === datos.dni ? 'DNI' : 'legajo'}. ¿Guardar igual?`)) return;
+  const hoy = hoyISO();
+  if (id) {
+    const e = EMPLEADOS.find(x => x.id === id);
+    if (e.puesto !== datos.puesto) e.movimientos.push({fecha:hoy, tipo:'Cambio de puesto', detalle:`${e.puesto || 'sin puesto'} → ${datos.puesto}`});
+    if (e.induccion.estado !== 'Realizada' && ind.estado === 'Realizada') e.movimientos.push({fecha:ind.fecha, tipo:'Inducción', detalle:'Inducción de ingreso realizada'});
+    Object.assign(e, datos);
+    e.induccion = ind;
+  } else {
+    const e = normalizarEmpleado({...datos, id:uid(), estado:'Activo', induccion:ind});
+    e.movimientos.push({fecha:datos.fechaIngreso, tipo:'Alta', detalle:`Ingreso como ${datos.puesto}`});
+    if (ind.estado === 'Realizada') e.movimientos.push({fecha:ind.fecha, tipo:'Inducción', detalle:'Inducción de ingreso realizada'});
+    EMPLEADOS.push(e);
+  }
+  closeModal('modalEmpleado');
+  refrescarNomina();
+  avisoGuardado(await saveEmpleados(), id ? 'Empleado modificado' : 'Alta registrada');
+}
+
+function abrirBaja(id) {
+  const e = EMPLEADOS.find(x => x.id === id);
+  document.getElementById('baja-id').value = id;
+  document.getElementById('baja-nombre').textContent = nombreCompleto(e) + (e.puesto ? ' — ' + e.puesto : '');
+  document.getElementById('baja-fecha').value = hoyISO();
+  document.getElementById('baja-motivo').value = 'Renuncia';
+  document.getElementById('baja-detalle').value = '';
+  openModal('modalBaja');
+}
+async function confirmarBaja() {
+  const e = EMPLEADOS.find(x => x.id === document.getElementById('baja-id').value);
+  const fecha = document.getElementById('baja-fecha').value;
+  if (!fecha) { showToast('Indicá la fecha de baja', true); return; }
+  const motivo = document.getElementById('baja-motivo').value, det = document.getElementById('baja-detalle').value.trim();
+  e.estado = 'Baja'; e.fechaBaja = fecha; e.motivoBaja = motivo + (det ? ' — ' + det : '');
+  e.movimientos.push({fecha, tipo:'Baja', detalle:e.motivoBaja});
+  closeModal('modalBaja');
+  refrescarNomina();
+  avisoGuardado(await saveEmpleados(), 'Baja registrada');
+}
+async function reactivarEmpleado(id) {
+  const e = EMPLEADOS.find(x => x.id === id);
+  if (!confirm(`¿Reactivar a ${nombreCompleto(e)}? (reingreso)`)) return;
+  const fecha = hoyISO();
+  e.estado = 'Activo'; e.fechaBaja = ''; e.motivoBaja = '';
+  e.movimientos.push({fecha, tipo:'Reingreso', detalle:'Reactivado en la nómina'});
+  refrescarNomina();
+  avisoGuardado(await saveEmpleados(), 'Empleado reactivado');
+}
+async function eliminarEmpleado(id) {
+  const e = EMPLEADOS.find(x => x.id === id);
+  if (!confirm(`¿Eliminar DEFINITIVAMENTE a ${nombreCompleto(e)} y toda su ficha?\n\nUsalo sólo para corregir errores de carga. Si la persona dejó la empresa, usá "Baja" para conservar el historial.`)) return;
+  EMPLEADOS = EMPLEADOS.filter(x => x.id !== id);
+  if (FICHA_ID === id) closeModal('modalFicha');
+  refrescarNomina();
+  avisoGuardado(await saveEmpleados(), 'Empleado eliminado');
+}
+
+function refrescarNomina() {
+  renderNomina(); updatePerfilKpis(); updateAreaChart(); renderPerfiles();
+  if (ORG_MODO === 'nominal') drawOrganigrama();
+  if (FICHA_ID && document.getElementById('modalFicha').classList.contains('open')) renderFicha();
+}
+
+// ── FICHA ──
+function verFicha(id) { FICHA_ID = id; renderFicha(); openModal('modalFicha'); }
+
+function renderFicha() {
+  const e = EMPLEADOS.find(x => x.id === FICHA_ID);
+  const body = document.getElementById('fichaBody');
+  if (!e) { body.innerHTML = '<div class="empty-row">Empleado no encontrado.</div>'; return; }
+  const p = perfilDe(e);
+  const ini = ((e.apellido || '?')[0] + ((e.nombre || '')[0] || '')).toUpperCase();
+  const rq = estadoRequisitos(e);
+
+  // Requisitos
+  const reqRows = rq.filas.map(f => {
+    const badge = {ok:'<span class="badge badge-ok">✔ Cumple</span>', vencido:'<span class="badge badge-red">Vencido</span>', tramite:'<span class="badge badge-plan">En trámite</span>', falta:'<span class="badge badge-pend">Falta</span>'}[f.res];
+    return `<tr>
+      <td><strong style="font-weight:500;color:var(--navy)">${esc(f.req)}</strong>${f.nota ? `<div style="font-size:11px;color:var(--muted)">${esc(f.nota)}</div>` : ''}</td>
+      <td><select class="f-select" style="padding:4px 8px;font-size:12px" onchange="setReqEmp(${f.i},'estado',this.value)">
+        ${['','Cumple','En trámite','No cumple'].map(o => `<option value="${o}" ${(f.st.estado || '') === o ? 'selected' : ''}>${o || '— sin dato —'}</option>`).join('')}
+      </select></td>
+      <td>${f.vence ? `<input type="date" class="f-input" style="padding:4px 8px;font-size:12px" value="${esc(f.st.vence || '')}" onchange="setReqEmp(${f.i},'vence',this.value)">` : '<span style="color:var(--muted);font-size:12px">No vence</span>'}</td>
+      <td>${badge}</td>
+    </tr>`;
+  }).join('') || `<tr><td colspan="4" class="empty-row">${p ? 'El perfil del puesto no tiene requisitos cargados.' : 'Asigná un puesto para ver sus requisitos.'}</td></tr>`;
+
+  // Capacitaciones por año
+  const capsOrd = [...e.caps].sort((a, b) => String(b.fecha).localeCompare(String(a.fecha)));
+  const anosCap = [...new Set(capsOrd.map(c => anioDe(c.fecha)))];
+  const capRows = anosCap.map(y => {
+    const items = capsOrd.filter(c => anioDe(c.fecha) === y);
+    const horas = items.reduce((a, c) => a + (Number(c.horas) || 0), 0);
+    return `<tr class="year-row"><td colspan="5">${y || 'Sin fecha'} · ${items.length} ${items.length === 1 ? 'capacitación' : 'capacitaciones'}${horas ? ' · ' + horas + ' h' : ''}</td></tr>` +
+      items.map(c => `<tr>
+        <td style="white-space:nowrap">${fmtF(c.fecha)}</td>
+        <td>${esc(c.actividad)}${c.actId ? '' : ' <span class="badge badge-gray">fuera del plan</span>'}${c.obs ? `<div style="font-size:11px;color:var(--muted)">${esc(c.obs)}</div>` : ''}</td>
+        <td style="text-align:center">${c.horas || '—'}</td>
+        <td><select class="f-select" style="padding:4px 8px;font-size:12px" onchange="setCapEficacia('${c.id}',this.value)">
+          ${['Pendiente de evaluar','Eficaz','Parcialmente eficaz','No eficaz'].map(o => `<option ${c.eficacia === o ? 'selected' : ''}>${o}</option>`).join('')}
+        </select></td>
+        <td style="text-align:right"><button class="btn-del" onclick="borrarCapEmp('${c.id}')">✕</button></td>
+      </tr>`).join('');
+  }).join('') || '<tr><td colspan="5" class="empty-row">Sin capacitaciones registradas.</td></tr>';
+
+  // Evaluaciones
+  const evOrd = [...e.evals].sort((a, b) => (b.anio - a.anio) || String(b.fecha).localeCompare(String(a.fecha)));
+  const evRows = evOrd.map(v => `<tr>
+      <td><strong style="color:var(--navy)">${v.anio}</strong></td>
+      <td style="white-space:nowrap">${fmtF(v.fecha)}</td>
+      <td style="text-align:center"><div class="score-circle score-${v.puntaje}" style="margin:auto;width:28px;height:28px;font-size:12px">${v.puntaje}</div></td>
+      <td><span class="badge ${v.estado === 'Evaluado' ? 'badge-ok' : 'badge-plan'}">${esc(v.estado)}</span></td>
+      <td style="font-size:12px;color:var(--muted)">${esc(v.obs) || '—'}</td>
+      <td style="white-space:nowrap;text-align:right"><button class="btn-sm" style="background:#f0e6ff;color:#6a1b9a" onclick="abrirEvalEmp('${v.id}')">✏️</button> <button class="btn-del" onclick="borrarEvalEmp('${v.id}')">✕</button></td>
+    </tr>`).join('') || '<tr><td colspan="6" class="empty-row">Sin evaluaciones cargadas.</td></tr>';
+
+  // Brecha de competencias (última evaluación) y evolución por año
+  const ue = ultimaEval(e);
+  let brechaHtml = '';
+  if (p && Object.keys(p.comps).length) {
+    const anosEv = [...new Set(e.evals.map(v => v.anio))].sort();
+    const ultDeAnio = y => e.evals.filter(v => v.anio === y).sort((a, b) => String(a.fecha).localeCompare(String(b.fecha))).pop();
+    let dentro = 0, evaluadas = 0;
+    const filas = Object.entries(p.comps).map(([c, rr]) => {
+      const r = rangoComp(rr);
+      const val = ue && ue.comps ? parseInt(ue.comps[c]) : NaN;
+      let res = '<span class="badge badge-gray">Sin evaluar</span>';
+      if (!isNaN(val)) {
+        evaluadas++;
+        if (val < r.min) res = '<span class="badge badge-red">Brecha</span>';
+        else if (val > r.max) res = '<span class="badge badge-plan">Supera</span>';
+        else { res = '<span class="badge badge-ok">En rango</span>'; dentro++; }
+      }
+      const hist = anosEv.map(y => { const v = ultDeAnio(y); const n = v && v.comps ? parseInt(v.comps[c]) : NaN; const col = isNaN(n) ? 'var(--muted)' : n < r.min ? 'var(--red)' : n > r.max ? 'var(--blue)' : 'var(--green)'; return `<td style="text-align:center;font-weight:600;color:${col}">${isNaN(n) ? '—' : n}</td>`; }).join('');
+      return `<tr><td>${esc(c)}</td><td style="text-align:center;font-weight:600;color:var(--navy)">${rangoTxt(r)}</td>${hist}<td>${res}</td></tr>`;
+    }).join('');
+    brechaHtml = `<div style="margin-top:14px">
+      <div style="font-size:11.5px;color:var(--muted);margin-bottom:6px">Competencias del puesto: nivel requerido vs. alcanzado por año ${ue ? `· última evaluación (${ue.anio}): <strong style="color:var(--navy)">${dentro} de ${evaluadas}</strong> en rango` : ''}</div>
+      <div style="overflow-x:auto"><table class="mini-table"><thead><tr><th>Competencia</th><th style="text-align:center">Requerido</th>${anosEv.map(y => `<th style="text-align:center">${y}</th>`).join('')}<th>Resultado</th></tr></thead><tbody>${filas}</tbody></table></div>
+    </div>`;
+  }
+
+  const movs = [...e.movimientos].sort((a, b) => String(b.fecha).localeCompare(String(a.fecha)));
+  const movHtml = movs.map(m => `<tr><td style="white-space:nowrap">${fmtF(m.fecha)}</td><td><strong style="font-weight:500">${esc(m.tipo)}</strong></td><td style="color:var(--muted);font-size:12px">${esc(m.detalle)}</td></tr>`).join('') || '<tr><td colspan="3" class="empty-row">Sin movimientos.</td></tr>';
+
+  body.innerHTML = `
+    <div class="ficha-head">
+      <div class="perfil-avatar" style="width:46px;height:46px;font-size:16px">${esc(ini)}</div>
+      <div style="flex:1;min-width:200px">
+        <div style="font-size:17px;font-weight:600">${esc(nombreCompleto(e))}</div>
+        <div style="font-size:12.5px;color:rgba(255,255,255,.7);margin-top:2px">${esc(e.puesto || 'Sin puesto asignado')}${p ? ' · ' + esc(p.area) : ''}${e.legajo ? ' · Legajo ' + esc(e.legajo) : ''}${e.dni ? ' · DNI ' + esc(e.dni) : ''}</div>
+      </div>
+      <span class="badge ${e.estado === 'Baja' ? 'badge-red' : 'badge-ok'}" style="font-size:12px">${e.estado === 'Baja' ? 'Baja ' + fmtF(e.fechaBaja) : 'Activo'}</span>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <button class="btn-sm" style="background:rgba(255,255,255,.15);color:white" onclick="abrirModalEmpleado('${e.id}')">✏️ Modificar</button>
+        <button class="btn-sm" style="background:#F4C75A;color:#1F3864;font-weight:600" onclick="descargarFichaPDF('${e.id}')">⬇ PDF</button>
+        ${e.estado === 'Baja' ? `<button class="btn-sm" style="background:rgba(255,255,255,.15);color:white" onclick="reactivarEmpleado('${e.id}')">↺ Reactivar</button>` : `<button class="btn-sm" style="background:rgba(255,120,120,.3);color:white" onclick="abrirBaja('${e.id}')">Dar de baja</button>`}
+      </div>
+    </div>
+    <div class="ficha-grid">
+      <div class="ficha-dato"><div class="k">Fecha de ingreso</div><div class="v">${fmtF(e.fechaIngreso)}</div></div>
+      <div class="ficha-dato"><div class="k">Antigüedad</div><div class="v">${antiguedad(e.fechaIngreso, e.estado === 'Baja' ? e.fechaBaja : null)}</div></div>
+      <div class="ficha-dato"><div class="k">Reporta a</div><div class="v" style="font-size:13px">${esc(p ? (p.dependeDe || 'Nivel máximo') : '—')}</div></div>
+      <div class="ficha-dato"><div class="k">Inducción de ingreso</div><div class="v" style="font-size:13px">${e.induccion.estado === 'Realizada' ? '✔ ' + fmtF(e.induccion.fecha) : '<span style="color:var(--amber)">Pendiente</span>'}</div></div>
+    </div>
+    ${e.estado === 'Baja' ? `<div style="background:var(--red-bg);color:var(--red);border-radius:8px;padding:8px 12px;font-size:12.5px;margin-bottom:14px">Motivo de baja: ${esc(e.motivoBaja || '—')}</div>` : ''}
+    ${e.obs ? `<div style="background:var(--gray);border-radius:8px;padding:8px 12px;font-size:12.5px;margin-bottom:14px;color:var(--muted)">${esc(e.obs)}</div>` : ''}
+
+    <div class="ficha-sec">
+      <div class="ficha-sec-head"><div class="ficha-sec-title">Requisitos del puesto · ${rq.ok}/${rq.total} cumplidos</div></div>
+      <table class="mini-table"><thead><tr><th>Requisito</th><th style="width:150px">Estado</th><th style="width:160px">Vencimiento</th><th style="width:100px">Situación</th></tr></thead><tbody>${reqRows}</tbody></table>
+    </div>
+
+    <div class="ficha-sec">
+      <div class="ficha-sec-head"><div class="ficha-sec-title">Capacitaciones recibidas · por año</div>
+        <button class="btn-sm btn-cargar" onclick="abrirCapEmp()">+ Registrar capacitación</button></div>
+      <table class="mini-table"><thead><tr><th style="width:90px">Fecha</th><th>Actividad</th><th style="width:60px;text-align:center">Horas</th><th style="width:170px">Eficacia</th><th style="width:40px"></th></tr></thead><tbody>${capRows}</tbody></table>
+    </div>
+
+    <div class="ficha-sec">
+      <div class="ficha-sec-head"><div class="ficha-sec-title">Evaluación de desempeño · resultados y evolución</div>
+        <button class="btn-sm btn-eval" onclick="abrirEvalEmp()">+ Cargar evaluación</button></div>
+      <div style="display:grid;grid-template-columns:${e.evals.length ? '1.4fr 1fr' : '1fr'};gap:14px;align-items:start">
+        <table class="mini-table"><thead><tr><th>Año</th><th>Fecha</th><th style="text-align:center">Puntaje</th><th>Estado</th><th>Observaciones</th><th></th></tr></thead><tbody>${evRows}</tbody></table>
+        ${e.evals.length ? '<div class="chart-wrap" style="height:190px"><canvas id="fichaChart"></canvas></div>' : ''}
+      </div>
+      ${brechaHtml}
+    </div>
+
+    <div class="ficha-sec">
+      <div class="ficha-sec-head"><div class="ficha-sec-title">Historial de movimientos</div></div>
+      <table class="mini-table"><tbody>${movHtml}</tbody></table>
+    </div>`;
+
+  if (fichaChart) { fichaChart.destroy(); fichaChart = null; }
+  const cv = document.getElementById('fichaChart');
+  if (cv && typeof Chart !== 'undefined') {
+    const anos = [...new Set(e.evals.map(v => v.anio))].sort();
+    const ultimo = y => e.evals.filter(v => v.anio === y).sort((a, b) => String(a.fecha).localeCompare(String(b.fecha))).pop().puntaje;
+    fichaChart = new Chart(cv, {type:'line', data:{labels:anos.map(String), datasets:[{label:'Puntaje general', data:anos.map(ultimo), borderColor:'#2F5496', backgroundColor:'rgba(47,84,150,.12)', fill:true, tension:.25, pointRadius:5, pointBackgroundColor:'#2F5496'}]},
+      options:{responsive:true, maintainAspectRatio:false, animation:false, plugins:{legend:{display:false}, title:{display:true, text:'Evolución del puntaje general', font:{size:11, family:'DM Sans'}, color:'#5a6680'}}, scales:{y:{min:0, max:5, ticks:{stepSize:1}}}}});
+  }
+}
+
+async function setReqEmp(i, campo, valor) {
+  const e = EMPLEADOS.find(x => x.id === FICHA_ID);
+  const p = perfilDe(e); if (!p || !p.requisitos[i]) return;
+  const nombre = p.requisitos[i].req;
+  e.requisitos[nombre] = {...(e.requisitos[nombre] || {}), [campo]: valor};
+  renderFicha(); renderNomina();
+  await saveEmpleados();
+}
+async function setCapEficacia(capId, val) {
+  const e = EMPLEADOS.find(x => x.id === FICHA_ID);
+  const c = e.caps.find(x => x.id === capId); if (!c) return;
+  c.eficacia = val;
+  await saveEmpleados();
+}
+async function borrarCapEmp(capId) {
+  if (!confirm('¿Quitar esta capacitación de la ficha?')) return;
+  const e = EMPLEADOS.find(x => x.id === FICHA_ID);
+  e.caps = e.caps.filter(c => c.id !== capId);
+  renderFicha(); renderNomina();
+  await saveEmpleados();
+}
+
+function abrirCapEmp() {
+  const e = EMPLEADOS.find(x => x.id === FICHA_ID);
+  document.getElementById('empCapTitulo').textContent = '📋 Capacitación — ' + nombreCompleto(e);
+  document.getElementById('ecap-act').innerHTML = FORMACION.map(f => `<option value="${f.id}">${f.id}. ${esc(f.tema)}</option>`).join('') + '<option value="__otra">Otra (externa / fuera del plan)…</option>';
+  document.getElementById('ecap-otra-wrap').style.display = 'none';
+  document.getElementById('ecap-otra').value = '';
+  document.getElementById('ecap-fecha').value = hoyISO();
+  document.getElementById('ecap-horas').value = '';
+  document.getElementById('ecap-eficacia').value = 'Pendiente de evaluar';
+  document.getElementById('ecap-obs').value = '';
+  openModal('modalEmpCap');
+}
+async function guardarEmpCap() {
+  const e = EMPLEADOS.find(x => x.id === FICHA_ID);
+  const sel = document.getElementById('ecap-act').value;
+  const fecha = document.getElementById('ecap-fecha').value;
+  if (!fecha) { showToast('Indicá la fecha', true); return; }
+  let actividad, actId = null;
+  if (sel === '__otra') {
+    actividad = document.getElementById('ecap-otra').value.trim();
+    if (!actividad) { showToast('Escribí el nombre de la capacitación', true); return; }
+  } else { const f = FORMACION.find(x => x.id === parseInt(sel)); actividad = f.tema; actId = f.id; }
+  const h = document.getElementById('ecap-horas').value;
+  e.caps.push({id:uid(), fecha, actividad, actId, horas: h ? Number(h) : '', eficacia: document.getElementById('ecap-eficacia').value, obs: document.getElementById('ecap-obs').value.trim()});
+  if (esInduccion(actividad) && e.induccion.estado !== 'Realizada') {
+    e.induccion = {estado:'Realizada', fecha};
+    e.movimientos.push({fecha, tipo:'Inducción', detalle:'Inducción de ingreso realizada'});
+  }
+  closeModal('modalEmpCap');
+  renderFicha(); renderNomina();
+  avisoGuardado(await saveEmpleados(), 'Capacitación registrada');
+}
+
+function abrirEvalEmp(evalId) {
+  const e = EMPLEADOS.find(x => x.id === FICHA_ID);
+  const v = evalId ? e.evals.find(x => x.id === evalId) : null;
+  const p = perfilDe(e);
+  document.getElementById('empEvalTitulo').textContent = '⭐ Evaluación — ' + nombreCompleto(e);
+  document.getElementById('eev-id').value = v ? v.id : '';
+  const anios = []; for (let y = ANIO + 1; y >= ANIO - 5; y--) anios.push(y);
+  document.getElementById('eev-anio').innerHTML = anios.map(y => `<option value="${y}">${y}</option>`).join('');
+  document.getElementById('eev-anio').value = v ? v.anio : ANIO;
+  document.getElementById('eev-fecha').value = v ? v.fecha : hoyISO();
+  document.getElementById('eev-puntaje').value = v ? v.puntaje : '';
+  document.getElementById('eev-estado').value = v ? v.estado : 'Evaluado';
+  document.getElementById('eev-obs').value = v ? v.obs : '';
+  const comps = p ? Object.entries(p.comps) : [];
+  document.getElementById('eevComps').innerHTML = comps.map(([c, rr]) => {
+    const r = rangoComp(rr), val = v && v.comps ? (v.comps[c] || '') : '';
+    return `<tr data-comp="${esc(c)}" data-min="${r.min}" data-max="${r.max}">
+      <td>${esc(c)}</td><td style="text-align:center;font-weight:600;color:var(--navy)">${rangoTxt(r)}</td>
+      <td><select class="f-select ev-c" style="padding:4px 8px;font-size:12px" onchange="badgeEvalComp(this)"><option value="">—</option>${[1,2,3,4].map(n => `<option value="${n}" ${String(val) === String(n) ? 'selected' : ''}>${n}</option>`).join('')}</select></td>
+      <td class="ev-res"></td></tr>`;
+  }).join('') || `<tr><td colspan="4" class="empty-row">${p ? 'El perfil no tiene competencias cargadas.' : 'Asigná un puesto al empleado para evaluar sus competencias.'}</td></tr>`;
+  document.querySelectorAll('#eevComps .ev-c').forEach(badgeEvalComp);
+  openModal('modalEmpEval');
+}
+function badgeEvalComp(sel) {
+  const tr = sel.closest('tr'), td = tr.querySelector('.ev-res'), v = parseInt(sel.value);
+  const min = parseInt(tr.dataset.min), max = parseInt(tr.dataset.max);
+  td.innerHTML = isNaN(v) ? '' : v < min ? '<span class="badge badge-red">Brecha</span>' : v > max ? '<span class="badge badge-plan">Supera</span>' : '<span class="badge badge-ok">En rango</span>';
+}
+async function guardarEmpEval() {
+  const e = EMPLEADOS.find(x => x.id === FICHA_ID);
+  const puntaje = parseInt(document.getElementById('eev-puntaje').value);
+  if (!puntaje) { showToast('Elegí el puntaje general', true); return; }
+  const comps = {};
+  document.querySelectorAll('#eevComps tr[data-comp]').forEach(tr => { const v = tr.querySelector('.ev-c').value; if (v) comps[tr.dataset.comp] = parseInt(v); });
+  const datos = {anio: parseInt(document.getElementById('eev-anio').value), fecha: document.getElementById('eev-fecha').value, puntaje, comps,
+    estado: document.getElementById('eev-estado').value, obs: document.getElementById('eev-obs').value.trim(), puesto: e.puesto};
+  const id = document.getElementById('eev-id').value;
+  if (id) Object.assign(e.evals.find(x => x.id === id), datos);
+  else e.evals.push({id:uid(), ...datos});
+  closeModal('modalEmpEval');
+  renderFicha(); renderNomina();
+  avisoGuardado(await saveEmpleados(), 'Evaluación guardada');
+}
+async function borrarEvalEmp(id) {
+  if (!confirm('¿Eliminar esta evaluación?')) return;
+  const e = EMPLEADOS.find(x => x.id === FICHA_ID);
+  e.evals = e.evals.filter(v => v.id !== id);
+  renderFicha(); renderNomina();
+  await saveEmpleados();
+}
+
+// ── Checklist de asistentes en "Registrar capacitación" ──
+function renderCapEmpList() {
+  const div = document.getElementById('capEmpList');
+  if (!div) return;
+  const q = norm(document.getElementById('cap-emp-buscar').value);
+  const act = EMPLEADOS.filter(e => e.estado !== 'Baja').sort((a, b) => nombreCompleto(a).localeCompare(nombreCompleto(b), 'es'));
+  if (!act.length) { div.innerHTML = '<div style="font-size:12px;color:var(--muted);padding:4px 0">No hay empleados en la nómina todavía.</div>'; return; }
+  const vis = act.filter(e => !q || norm(nombreCompleto(e) + ' ' + e.puesto).includes(q));
+  div.innerHTML = vis.map(e => `<label><input type="checkbox" ${CAP_EMP_SEL.has(e.id) ? 'checked' : ''} onchange="toggleCapEmp('${e.id}',this.checked)"> ${esc(nombreCompleto(e))} <span style="color:var(--muted);font-size:11px">· ${esc(e.puesto || 'sin puesto')}</span></label>`).join('') +
+    `<div style="font-size:11px;color:var(--muted);padding-top:4px;border-top:1px solid var(--border);margin-top:4px">${CAP_EMP_SEL.size} seleccionados</div>`;
+}
+function toggleCapEmp(id, on) { if (on) CAP_EMP_SEL.add(id); else CAP_EMP_SEL.delete(id); renderCapEmpList(); }
+function capEmpTodos(on) {
+  const q = norm(document.getElementById('cap-emp-buscar').value);
+  EMPLEADOS.filter(e => e.estado !== 'Baja' && (!q || norm(nombreCompleto(e) + ' ' + e.puesto).includes(q))).forEach(e => on ? CAP_EMP_SEL.add(e.id) : CAP_EMP_SEL.delete(e.id));
+  renderCapEmpList();
+}
+
+// ── IMPORTAR NÓMINA (pegado desde Excel) ──
+function parseFecha(s) {
+  s = String(s || '').trim();
+  if (!s) return '';
+  let m = s.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})$/);
+  if (m) { let y = parseInt(m[3]); if (y < 100) y += y > 50 ? 1900 : 2000; return `${y}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`; }
+  m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+  if (m) return `${m[1]}-${m[2].padStart(2,'0')}-${m[3].padStart(2,'0')}`;
+  if (/^\d{4,5}$/.test(s)) { const d = new Date(Date.UTC(1899, 11, 30) + parseInt(s) * 86400000); return d.toISOString().slice(0, 10); }
+  return '';
+}
+function matchPuesto(txt) {
+  const t = norm(txt);
+  if (!t) return '';
+  const exact = PERFILES_DATA.find(p => norm(p.puesto) === t);
+  if (exact) return exact.puesto;
+  const parc = PERFILES_DATA.filter(p => norm(p.puesto).includes(t) || t.includes(norm(p.puesto)));
+  return parc.length === 1 ? parc[0].puesto : '';
+}
+async function importarNomina() {
+  const txt = document.getElementById('importTexto').value;
+  const lineas = txt.split(/\r?\n/).map(l => l.split('\t').map(c => c.trim())).filter(c => c.some(Boolean));
+  if (!lineas.length) { showToast('Pegá las filas copiadas desde Excel', true); return; }
+  let altas = 0; const saltados = [], sinPuesto = [], errores = [];
+  lineas.forEach((c, n) => {
+    if (n === 0 && c.some(x => /puesto|apellido|legajo/i.test(x))) return; // encabezado
+    let legajo, apellido, nombre, dni, puestoTxt, fecha;
+    if (c.length >= 6) [legajo, apellido, nombre, dni, puestoTxt, fecha] = c;
+    else if (c.length === 5) {
+      let ayn; [legajo, ayn, dni, puestoTxt, fecha] = c;
+      if (ayn.includes(',')) { [apellido, nombre] = ayn.split(',').map(s => s.trim()); }
+      else { const w = ayn.split(/\s+/); apellido = w.shift(); nombre = w.join(' '); }
+    } else { errores.push(`Fila ${n + 1}: tiene ${c.length} columnas (se esperan 5 o 6)`); return; }
+    dni = String(dni || '').replace(/\D/g, '');
+    if (!apellido) { errores.push(`Fila ${n + 1}: falta el apellido`); return; }
+    if (EMPLEADOS.some(e => (dni && e.dni === dni) || (legajo && e.legajo === legajo))) { saltados.push(`${apellido}, ${nombre || ''}`); return; }
+    const puesto = matchPuesto(puestoTxt);
+    const fechaIngreso = parseFecha(fecha);
+    const e = normalizarEmpleado({id:uid(), legajo: legajo || '', apellido, nombre: nombre || '', dni, puesto, fechaIngreso, estado:'Activo'});
+    e.movimientos.push({fecha: fechaIngreso || hoyISO(), tipo:'Alta', detalle: puesto ? `Ingreso como ${puesto}` : 'Importado desde Excel'});
+    if (!puesto) { e.obs = puestoTxt ? `Puesto en Excel: ${puestoTxt}` : ''; sinPuesto.push(`${apellido} (${puestoTxt || 'vacío'})`); }
+    EMPLEADOS.push(e); altas++;
+  });
+  refrescarNomina();
+  const ok = altas ? await saveEmpleados() : true;
+  document.getElementById('importResultado').innerHTML =
+    `<div style="color:var(--green);font-weight:600">✔ ${altas} empleado(s) importados${altas ? (ok ? ' y guardados en Sheets' : ' (guardados en este navegador)') : ''}.</div>` +
+    (sinPuesto.length ? `<div style="color:var(--amber);margin-top:6px">⚠ ${sinPuesto.length} sin puesto que coincida con un perfil (asignalo desde ✏️): ${esc(sinPuesto.join(' · '))}</div>` : '') +
+    (saltados.length ? `<div style="color:var(--muted);margin-top:6px">Salteados por DNI/legajo ya existente: ${esc(saltados.join(' · '))}</div>` : '') +
+    (errores.length ? `<div style="color:var(--red);margin-top:6px">${esc(errores.join(' · '))}</div>` : '');
+  if (altas) document.getElementById('importTexto').value = '';
+}
+
+// ── PDF de la ficha ──
+const FICHA_DOC = {titulo:'Ficha de empleado', codigo:'R-RH-005', rev:'Rev.00'};
+function descargarFichaPDF(id) {
+  const e = EMPLEADOS.find(x => x.id === id);
+  const doc = _nuevoDoc(); if (!doc || !e) return;
+  const p = perfilDe(e);
+  const W = doc.internal.pageSize.getWidth(), Hpg = doc.internal.pageSize.getHeight(), M = 18, CW = W - M*2;
+  let y = 0;
+  function banda() {
+    doc.setFillColor(31,56,100); doc.rect(0,0,W,13,'F');
+    doc.setFillColor(79,168,216); doc.rect(0,13,W,1.1,'F');
+    doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(8.6);
+    doc.text(PDF_DOC.empresa, M, 8.6);
+    doc.setFont('helvetica','normal'); doc.setFontSize(7.6);
+    doc.text(FICHA_DOC.titulo + '  ·  ' + FICHA_DOC.codigo + ' ' + FICHA_DOC.rev, W-M, 8.6, {align:'right'});
+    doc.setTextColor(26,37,64);
+  }
+  function espacio(h) { if (y + h > Hpg - 16) { doc.addPage(); banda(); y = 24; } }
+  function rotulo(t) { espacio(14); y += 4; doc.setFont('helvetica','bold'); doc.setFontSize(8.4); doc.setTextColor(31,56,100); doc.text(t.toUpperCase(), M, y); doc.setDrawColor(221,227,237); doc.setLineWidth(.3); doc.line(M, y+1.8, M+CW, y+1.8); y += 6.5; doc.setTextColor(26,37,64); }
+  function fila(cols, widths, bold) {
+    doc.setFont('helvetica', bold ? 'bold' : 'normal'); doc.setFontSize(8.6);
+    const partes = cols.map((c, i) => doc.splitTextToSize(String(c == null || c === '' ? '—' : c), widths[i] - 2));
+    const h = Math.max(...partes.map(p => p.length)) * 4.2 + 1.6;
+    espacio(h);
+    let x = M;
+    partes.forEach((pt, i) => { doc.text(pt, x, y); x += widths[i]; });
+    y += h;
+  }
+  banda(); y = 22;
+  doc.setFillColor(31,56,100); doc.roundedRect(M, y, CW, 20, 2.5, 2.5, 'F');
+  doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(12.5);
+  doc.text(nombreCompleto(e), M + 6, y + 9);
+  doc.setFont('helvetica','normal'); doc.setFontSize(8.6); doc.setTextColor(189,215,238);
+  doc.text([e.puesto || 'Sin puesto asignado', p ? p.area : '', e.legajo ? 'Legajo ' + e.legajo : '', e.dni ? 'DNI ' + e.dni : ''].filter(Boolean).join('  ·  '), M + 6, y + 15.2);
+  doc.text(e.estado === 'Baja' ? 'BAJA ' + fmtF(e.fechaBaja) : 'ACTIVO', W - M - 6, y + 9, {align:'right'});
+  doc.setTextColor(26,37,64); y += 28;
+
+  const c4 = [CW/4, CW/4, CW/4, CW/4];
+  fila(['Fecha de ingreso', 'Antigüedad', 'Reporta a', 'Inducción'], c4, true);
+  fila([fmtF(e.fechaIngreso), antiguedad(e.fechaIngreso, e.estado === 'Baja' ? e.fechaBaja : null), p ? (p.dependeDe || 'Nivel máximo') : '—', e.induccion.estado === 'Realizada' ? 'Realizada ' + fmtF(e.induccion.fecha) : 'Pendiente'], c4);
+  if (e.estado === 'Baja') fila(['Motivo de baja: ' + (e.motivoBaja || '—')], [CW]);
+
+  const rq = estadoRequisitos(e);
+  rotulo(`Requisitos del puesto (${rq.ok}/${rq.total} cumplidos)`);
+  const wr = [CW*0.46, CW*0.18, CW*0.18, CW*0.18];
+  fila(['Requisito', 'Estado', 'Vencimiento', 'Situación'], wr, true);
+  rq.filas.forEach(f => fila([f.req, f.st.estado || '—', f.vence ? fmtF(f.st.vence) : 'No vence', {ok:'Cumple', vencido:'Vencido', tramite:'En trámite', falta:'Falta'}[f.res]], wr));
+  if (!rq.filas.length) fila(['Sin requisitos definidos para el puesto.'], [CW]);
+
+  rotulo('Capacitaciones recibidas');
+  const wc = [CW*0.15, CW*0.53, CW*0.1, CW*0.22];
+  const caps = [...e.caps].sort((a, b) => String(b.fecha).localeCompare(String(a.fecha)));
+  const anos = [...new Set(caps.map(c => anioDe(c.fecha)))];
+  if (!caps.length) fila(['Sin capacitaciones registradas.'], [CW]);
+  anos.forEach(yr => {
+    const it = caps.filter(c => anioDe(c.fecha) === yr);
+    const hs = it.reduce((a, c) => a + (Number(c.horas) || 0), 0);
+    fila([`${yr} — ${it.length} capacitación(es)${hs ? ' · ' + hs + ' h' : ''}`], [CW], true);
+    it.forEach(c => fila([fmtF(c.fecha), c.actividad, c.horas || '—', c.eficacia], wc));
+  });
+
+  rotulo('Evaluaciones de desempeño');
+  const we = [CW*0.1, CW*0.15, CW*0.1, CW*0.2, CW*0.45];
+  const evs = [...e.evals].sort((a, b) => (b.anio - a.anio));
+  if (!evs.length) fila(['Sin evaluaciones cargadas.'], [CW]);
+  else { fila(['Año', 'Fecha', 'Puntaje', 'Estado', 'Observaciones'], we, true); evs.forEach(v => fila([v.anio, fmtF(v.fecha), v.puntaje + ' / 5', v.estado, v.obs], we)); }
+  const ue = ultimaEval(e);
+  if (ue && p && Object.keys(p.comps).length) {
+    rotulo(`Competencias — última evaluación (${ue.anio})`);
+    const wk = [CW*0.5, CW*0.17, CW*0.17, CW*0.16];
+    fila(['Competencia', 'Requerido', 'Alcanzado', 'Resultado'], wk, true);
+    Object.entries(p.comps).forEach(([c, rr]) => {
+      const r = rangoComp(rr), v = parseInt((ue.comps || {})[c]);
+      fila([c, rangoTxt(r), isNaN(v) ? '—' : v, isNaN(v) ? 'Sin evaluar' : v < r.min ? 'Brecha' : v > r.max ? 'Supera' : 'En rango'], wk);
+    });
+  }
+  y += 14; espacio(16);
+  doc.setDrawColor(150,150,150); doc.line(M, y, M + 60, y); doc.line(W - M - 60, y, W - M, y);
+  doc.setFontSize(7.6); doc.setTextColor(90,102,128);
+  doc.text('Firma del empleado', M, y + 4); doc.text('Firma RRHH', W - M - 60, y + 4);
+
+  const tot = doc.internal.getNumberOfPages();
+  for (let i = 1; i <= tot; i++) {
+    doc.setPage(i);
+    doc.setDrawColor(226,231,240); doc.setLineWidth(.3); doc.line(18, Hpg-12.5, W-18, Hpg-12.5);
+    doc.setFont('helvetica','normal'); doc.setFontSize(7); doc.setTextColor(140,148,165);
+    doc.text(PDF_DOC.empresa + '  ·  ' + FICHA_DOC.codigo + ' ' + FICHA_DOC.rev + '  ·  Tablero RRHH, ' + _fechaHoy(), 18, Hpg-8.5);
+    doc.text('Página ' + i + ' de ' + tot, W-18, Hpg-8.5, {align:'right'});
+  }
+  doc.save('Ficha_' + _slug(nombreCompleto(e)) + '_VALPOB.pdf');
+  showToast('✔ Ficha descargada');
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+//  EDITOR DE CATÁLOGOS
+// ═══════════════════════════════════════════════════════════════════════
+let CAT_EDIT = null, CAT_TAB = 'comp';
+function openModalCatalogos(tab) {
+  CAT_EDIT = {
+    comp: CAT_COMP.map(c => ({...c, orig:c.nombre})),
+    req:  CAT_REQ.map(r => ({...r, orig:r.nombre})),
+  };
+  catTab(tab || 'comp');
+  openModal('modalCatalogos');
+}
+function catTab(t) {
+  CAT_TAB = t;
+  document.getElementById('catTabComp').classList.toggle('active', t === 'comp');
+  document.getElementById('catTabReq').classList.toggle('active', t === 'req');
+  renderCatalogo();
+}
+function usoComp(nombre) { return PERFILES_DATA.filter(p => p.comps && p.comps[nombre]).length; }
+function usoReq(nombre) { return PERFILES_DATA.filter(p => (p.requisitos || []).some(r => r.req === nombre)).length; }
+function renderCatalogo() {
+  const b = document.getElementById('catBody');
+  if (CAT_TAB === 'comp') {
+    b.innerHTML = `
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px;font-size:11.5px">
+        ${[1,2,3,4].map(n => `<div style="background:var(--gray);border-radius:6px;padding:6px 8px"><strong style="color:var(--navy)">${n} · ${NIVELES[n]}</strong><div style="color:var(--muted)">${['Conoce lo básico, necesita supervisión.','Lo aplica en situaciones habituales con autonomía.','Lo domina y resuelve situaciones complejas.','Es referente: enseña y mejora la práctica.'][n-1]}</div></div>`).join('')}
+      </div>
+      <div style="max-height:52vh;overflow-y:auto">
+      <table class="mini-table"><thead><tr><th style="width:28%">Competencia</th><th style="width:18%">Grupo</th><th>Definición</th><th style="width:60px;text-align:center">Perfiles</th><th style="width:40px"></th></tr></thead><tbody>
+      ${CAT_EDIT.comp.map((c, i) => `<tr>
+        <td><input class="f-input" style="padding:5px 8px;font-size:12px" value="${esc(c.nombre)}" oninput="CAT_EDIT.comp[${i}].nombre=this.value"></td>
+        <td><select class="f-select" style="padding:5px 8px;font-size:12px" onchange="CAT_EDIT.comp[${i}].grupo=this.value">${GRUPOS_COMP.map(g => `<option ${c.grupo === g ? 'selected' : ''}>${g}</option>`).join('')}</select></td>
+        <td><input class="f-input" style="padding:5px 8px;font-size:12px" value="${esc(c.def || '')}" oninput="CAT_EDIT.comp[${i}].def=this.value"></td>
+        <td style="text-align:center;color:var(--muted)">${c.orig ? usoComp(c.orig) : 0}</td>
+        <td><button class="btn-del" onclick="quitarCat('comp',${i})">✕</button></td></tr>`).join('')}
+      </tbody></table></div>
+      <button class="btn-secondary btn-mini" style="margin-top:10px" onclick="CAT_EDIT.comp.push({nombre:'',grupo:'Actitudinales',def:'',orig:null});renderCatalogo()">+ Agregar competencia</button>
+      <div style="font-size:11.5px;color:var(--muted);margin-top:8px">Si renombrás una competencia, se actualiza sola en todos los perfiles y evaluaciones.</div>`;
+  } else {
+    b.innerHTML = `
+      <div style="max-height:52vh;overflow-y:auto">
+      <table class="mini-table"><thead><tr><th style="width:32%">Requisito</th><th style="width:90px;text-align:center">¿Vence?</th><th>Descripción / a quién aplica</th><th style="width:60px;text-align:center">Perfiles</th><th style="width:40px"></th></tr></thead><tbody>
+      ${CAT_EDIT.req.map((r, i) => `<tr>
+        <td><input class="f-input" style="padding:5px 8px;font-size:12px" value="${esc(r.nombre)}" oninput="CAT_EDIT.req[${i}].nombre=this.value"></td>
+        <td style="text-align:center"><input type="checkbox" ${r.vence ? 'checked' : ''} onchange="CAT_EDIT.req[${i}].vence=this.checked"></td>
+        <td><input class="f-input" style="padding:5px 8px;font-size:12px" value="${esc(r.def || '')}" oninput="CAT_EDIT.req[${i}].def=this.value"></td>
+        <td style="text-align:center;color:var(--muted)">${r.orig ? usoReq(r.orig) : 0}</td>
+        <td><button class="btn-del" onclick="quitarCat('req',${i})">✕</button></td></tr>`).join('')}
+      </tbody></table></div>
+      <button class="btn-secondary btn-mini" style="margin-top:10px" onclick="CAT_EDIT.req.push({nombre:'',vence:false,def:'',orig:null});renderCatalogo()">+ Agregar requisito</button>
+      <div style="font-size:11.5px;color:var(--muted);margin-top:8px">"¿Vence?" habilita la fecha de vencimiento en la ficha de cada empleado (licencias, certificaciones, antecedentes).</div>`;
+  }
+}
+function quitarCat(tipo, i) {
+  const it = CAT_EDIT[tipo][i];
+  const uso = it.orig ? (tipo === 'comp' ? usoComp(it.orig) : usoReq(it.orig)) : 0;
+  if (uso && !confirm(`"${it.orig}" se usa en ${uso} perfil(es). Si lo quitás del catálogo, también se quita de esos perfiles. ¿Seguir?`)) return;
+  CAT_EDIT[tipo].splice(i, 1);
+  renderCatalogo();
+}
+async function guardarCatalogos() {
+  for (const t of ['comp', 'req']) {
+    CAT_EDIT[t] = CAT_EDIT[t].map(x => ({...x, nombre: String(x.nombre || '').trim()})).filter(x => x.nombre);
+    const nombres = CAT_EDIT[t].map(x => x.nombre.toLowerCase());
+    const dup = nombres.find((n, i) => nombres.indexOf(n) !== i);
+    if (dup) { showToast(`Nombre repetido en el catálogo: ${dup}`, true); return; }
+  }
+  const renComp = {}, renReq = {};
+  CAT_EDIT.comp.forEach(c => { if (c.orig && c.orig !== c.nombre) renComp[c.orig] = c.nombre; });
+  CAT_EDIT.req.forEach(r => { if (r.orig && r.orig !== r.nombre) renReq[r.orig] = r.nombre; });
+  const vivosComp = new Set(CAT_EDIT.comp.map(c => c.orig).filter(Boolean));
+  const vivosReq = new Set(CAT_EDIT.req.map(r => r.orig).filter(Boolean));
+  const borrComp = CAT_COMP.map(c => c.nombre).filter(n => !vivosComp.has(n));
+  const borrReq = CAT_REQ.map(r => r.nombre).filter(n => !vivosReq.has(n));
+
+  PERFILES_DATA.forEach(p => {
+    const nc = {};
+    Object.entries(p.comps || {}).forEach(([k, v]) => { if (borrComp.includes(k)) return; nc[renComp[k] || k] = v; });
+    p.comps = nc;
+    p.requisitos = (p.requisitos || []).filter(r => !borrReq.includes(r.req)).map(r => ({...r, req: renReq[r.req] || r.req}));
+  });
+  let empCambio = false;
+  EMPLEADOS.forEach(e => {
+    e.evals.forEach(v => {
+      const nc = {};
+      Object.entries(v.comps || {}).forEach(([k, val]) => { if (renComp[k]) empCambio = true; nc[renComp[k] || k] = val; });
+      v.comps = nc;
+    });
+    const nr = {};
+    Object.entries(e.requisitos || {}).forEach(([k, val]) => { if (renReq[k]) empCambio = true; nr[renReq[k] || k] = val; });
+    e.requisitos = nr;
+  });
+  CAT_COMP = CAT_EDIT.comp.map(({orig, ...c}) => c);
+  CAT_REQ = CAT_EDIT.req.map(({orig, ...r}) => r);
+  closeModal('modalCatalogos');
+  refrescarTodo();
+  // si el modal de perfil está abierto, refrescar sus desplegables
+  if (document.getElementById('modalPerfil').classList.contains('open')) {
+    document.querySelectorAll('#perfilCompsEditor .cr-nombre').forEach(s => { const v = renComp[s.value] || s.value; s.innerHTML = compOptions(borrComp.includes(v) ? '' : v); });
+    document.querySelectorAll('#perfilReqEditor .rq-nombre').forEach(s => { const v = renReq[s.value] || s.value; s.innerHTML = reqOptions(borrReq.includes(v) ? '' : v); });
+  }
+  saveStore('catComp', CAT_COMP);
+  saveStore('catReq', CAT_REQ);
+  if (empCambio) saveEmpleados();
+  avisoGuardado(await savePerfiles(), 'Catálogo actualizado');
+}
+
+// ── Gráfico "Personal por área" (Resumen) ──
+let chartAreasInst = null;
+function updateAreaChart() {
+  const cv = document.getElementById('chartAreas');
+  if (!cv || typeof Chart === 'undefined') return;
+  const activos = EMPLEADOS.filter(e => e.estado !== 'Baja');
+  const cont = {};
+  if (activos.length) activos.forEach(e => { const p = perfilDe(e); const a = p ? (p.area || 'Sin área') : 'Sin puesto'; cont[a] = (cont[a] || 0) + 1; });
+  else PERFILES_DATA.forEach(p => { const a = p.area || 'Sin área'; cont[a] = (cont[a] || 0) + 1; });
+  document.getElementById('chartAreasTitle').textContent = activos.length ? 'Personal por área (nómina activa)' : 'Puestos por área (cargá la nómina para ver personas)';
+  const labels = Object.keys(cont).sort((a, b) => cont[b] - cont[a]);
+  const pal = ['#1F3864','#2F5496','#4FA8D8','#375623','#B87333','#BDD7EE','#5a6680','#7FB069','#E0A458','#8E6C8A','#C44536','#9AA5B1'];
+  const colors = labels.map((_, i) => pal[i % pal.length]);
+  if (chartAreasInst) chartAreasInst.destroy();
+  chartAreasInst = new Chart(cv, {type:'doughnut', data:{labels, datasets:[{data:labels.map(l => cont[l]), backgroundColor:colors, borderWidth:2, borderColor:'#fff'}]},
+    options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}}});
+  document.getElementById('legendAreas').innerHTML = labels.map((l, i) => `<span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:2px;background:${colors[i]}"></span>${esc(l)} (${cont[l]})</span>`).join('');
+}
+
 document.addEventListener('DOMContentLoaded', () => {
-  loadPerfilesFromStorage();
+  // 1) arranca al instante con la copia de este navegador
+  try {
+    const local = _lsGet();
+    if (Object.keys(local).length) {
+      const m = {}; STORE_KEYS.forEach(k => { if (local[k]) m[k] = local[k]; });
+      if (m.catComp) CAT_COMP = m.catComp.value;
+      if (m.catReq) CAT_REQ = m.catReq.value;
+      if (m.perfiles) { PERFILES_DATA.splice(0, PERFILES_DATA.length, ...m.perfiles.value.map(normalizarPerfil)); PERFILES_DESDE_STORE = true; }
+      if (m.empleados) EMPLEADOS = m.empleados.value.map(normalizarEmpleado);
+      if (m.externos) ORG_EXTERNOS = m.externos.value;
+    }
+  } catch(e) {}
+  asegurarCatalogo(); rebuildPuestos();
   renderAlertas();
-  renderFormacion(); renderPerfiles(); renderDesempenio(); renderEficaciaTable();
-  buildCharts(); updateKpis(); updatePerfilKpis(); syncSheets();
+  renderFormacion(); renderPerfiles(); renderDesempenio(); renderEficaciaTable(); renderNomina();
+  buildCharts(); updateKpis(); updatePerfilKpis();
   sincronizarOrganigrama(); renderOrgTable(); drawOrganigrama();
+  // 2) después trae Sheets (gana siempre la versión más nueva)
+  syncSheets();
 });
 </script>
 </body>
